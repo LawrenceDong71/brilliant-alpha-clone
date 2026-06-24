@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Admins are identified by a tamper-proof custom claim minted server-side
+    // (see scripts/grant-admin.mjs). The client cannot forge this.
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Each user can read and write only their own profile and progress.
+    // Admins can read and write any user's data.
+    match /users/{uid} {
+      allow read, write: if isAdmin() ||
+        (request.auth != null && request.auth.uid == uid);
+
+      match /progress/{lessonId} {
+        allow read, write: if isAdmin() ||
+          (request.auth != null && request.auth.uid == uid);
+      }
+    }
+  }
+}
