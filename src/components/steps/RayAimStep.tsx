@@ -22,8 +22,8 @@ const QUIZ = {
   question: 'While you steered the ship home, what stayed in exactly the same place the whole time?',
   options: [
     { id: 'ship', label: 'The ship' },
-    { id: 'endpoint', label: 'The lighthouse — the ray’s endpoint' },
-    { id: 'direction', label: 'The beam’s direction (the angle)' },
+    { id: 'endpoint', label: 'The lighthouse' },
+    { id: 'direction', label: 'The beam’s direction' },
     { id: 'edge', label: 'The edge of the sea' },
   ],
   correctId: 'endpoint',

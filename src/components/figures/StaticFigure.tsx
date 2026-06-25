@@ -61,7 +61,7 @@ function TriangleFigure() {
 }
 
 function RightTriangleFigure({ a, b }: { a: number; b: number }) {
-  const ox = 40
+  const ox = 52
   const oy = 140
   const scale = Math.min(120 / Math.max(a, b), 26)
   const right = { x: ox, y: oy }
@@ -72,7 +72,7 @@ function RightTriangleFigure({ a, b }: { a: number; b: number }) {
       <polygon points={`${right.x},${right.y} ${bottom.x},${bottom.y} ${top.x},${top.y}`} fill="var(--accent-bg)" stroke={ACCENT} strokeWidth={3} strokeLinejoin="round" />
       <rect x={right.x} y={right.y - 14} width={14} height={14} fill="none" stroke={STROKE} strokeWidth={2} />
       <text x={(right.x + bottom.x) / 2 - 4} y={oy + 18} fontSize={13} fill="var(--text-h)">b = {b}</text>
-      <text x={right.x - 34} y={(right.y + top.y) / 2} fontSize={13} fill="var(--text-h)">a = {a}</text>
+      <text x={right.x - 8} y={(right.y + top.y) / 2 + 4} fontSize={13} textAnchor="end" fill="var(--text-h)">a = {a}</text>
       <text x={(bottom.x + top.x) / 2 + 6} y={(bottom.y + top.y) / 2 - 6} fontSize={13} fill={ACCENT}>c</text>
     </svg>
   )
@@ -196,8 +196,8 @@ function TransformTrioFigure() {
       <text x={120} y={92} fontSize={12} fill="var(--text)" textAnchor="middle">Flip</text>
 
       {/* Turn */}
-      <rect x={186} y={50} width={24} height={24} fill="var(--accent-bg)" stroke={ACCENT} strokeWidth={2} />
-      <path d="M210 44 A 22 22 0 1 1 184 50" fill="none" stroke={ACCENT} strokeWidth={2} markerEnd="url(#trio-arrow)" />
+      <rect x={188} y={46} width={24} height={24} rx={2} fill="var(--accent-bg)" stroke={ACCENT} strokeWidth={2} />
+      <path d="M210 40.7 A 20 20 0 1 1 190 40.7" fill="none" stroke={ACCENT} strokeWidth={2} strokeLinecap="round" markerEnd="url(#trio-arrow)" />
       <text x={200} y={92} fontSize={12} fill="var(--text)" textAnchor="middle">Turn</text>
 
       <defs>

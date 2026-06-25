@@ -17,6 +17,14 @@ const angDiff = (a: number, b: number) => {
   return Math.abs(d)
 }
 
+const turnName = (deg: number) => {
+  const d = norm360(deg)
+  if (d === 90) return 'a quarter-turn (90°)'
+  if (d === 180) return 'a half-turn (180°)'
+  if (d === 270) return 'a three-quarter-turn (270°)'
+  return `a ${d}° turn`
+}
+
 export function SpinShapeStep({ step, setChecker, locked }: InteractiveStepProps<Step>) {
   const { min, max } = step.grid
   const span = max - min
@@ -25,14 +33,23 @@ export function SpinShapeStep({ step, setChecker, locked }: InteractiveStepProps
   const gy = (y: number) => VB - PAD - (y - min) * unit
   const snap = step.snapDegrees ?? 5
   const C = step.center
+  const targets = step.targets
 
   const svgRef = useRef<SVGSVGElement | null>(null)
   const [angle, setAngle] = useState(0)
+  const [roundIndex, setRoundIndex] = useState(0)
+  const [result, setResult] = useState<null | { ok: boolean; angle: number }>(null)
+  const [done, setDone] = useState(false)
   const dragging = useRef(false)
 
+  const target = targets[roundIndex]
+  const guided = roundIndex === 0
+  const awaitingNext = result?.ok === true && !done
+  const frozen = locked || done || awaitingNext
+
   useEffect(() => {
-    setChecker(() => angDiff(angle, step.targetAngle) <= step.toleranceDegrees)
-  }, [angle, step.targetAngle, step.toleranceDegrees, setChecker])
+    setChecker(() => done)
+  }, [done, setChecker])
 
   const rot = (p: Point, deg: number): Point => {
     const r = (deg * Math.PI) / 180
@@ -63,10 +80,11 @@ export function SpinShapeStep({ step, setChecker, locked }: InteractiveStepProps
   const handlePos = rot(baseCen, angle)
 
   const onDown = (e: React.PointerEvent<SVGSVGElement>) => {
-    if (locked) return
+    if (frozen) return
     const c = toContent(e.clientX, e.clientY)
     if (Math.hypot(c.x - handlePos.x, c.y - handlePos.y) <= 1.6) {
       dragging.current = true
+      if (result) setResult(null)
       e.currentTarget.setPointerCapture(e.pointerId)
       setFromPointer(e.clientX, e.clientY)
     }
@@ -79,9 +97,27 @@ export function SpinShapeStep({ step, setChecker, locked }: InteractiveStepProps
     dragging.current = false
   }
 
+  const submit = () => {
+    if (frozen) return
+    const ok = angDiff(angle, target) <= step.toleranceDegrees
+    setResult({ ok, angle })
+    if (ok && roundIndex >= targets.length - 1) setDone(true)
+  }
+  const nextRound = () => {
+    setRoundIndex((i) => i + 1)
+    setAngle(0)
+    setResult(null)
+  }
+  const resetAngle = () => {
+    setAngle(0)
+    setResult(null)
+  }
+
   const poly = (pts: Point[]) => pts.map((p) => `${gx(p.x)},${gy(p.y)}`).join(' ')
   const cur = step.shape.map((p) => rot(p, angle))
-  const target = step.shape.map((p) => rot(p, step.targetAngle))
+  const targetShape = step.shape.map((p) => rot(p, target))
+  const showTarget = guided && !done
+  const showAngle = guided && !done
 
   const lines = []
   for (let i = min; i <= max; i++) {
@@ -92,7 +128,6 @@ export function SpinShapeStep({ step, setChecker, locked }: InteractiveStepProps
   }
   const axes = min <= 0 && max >= 0
 
-  // sweep arc sampled as a polyline (content -> pixel), radius slightly inside the handle
   const arcR = r0 * 0.55
   const arcPts: string[] = []
   const steps = Math.max(2, Math.round(Math.abs(angle) / 4))
@@ -106,11 +141,17 @@ export function SpinShapeStep({ step, setChecker, locked }: InteractiveStepProps
   const hxp = gx(handlePos.x)
   const hyp = gy(handlePos.y)
 
+  const instruction = done
+    ? 'All turns complete — press Check to finish.'
+    : guided
+      ? `Turn ${turnName(target)} counterclockwise onto the dashed outline.`
+      : `Turn ${turnName(target)} counterclockwise — no outline, judge it yourself.`
+
   return (
     <div className="interactive">
       <div className="readout small">
-        <span>rotation = {Math.round(angle)}°</span>
-        <span className="readout-label">drag the {step.shapeLabel ?? 'car'} around the hub</span>
+        <span>{showAngle ? `rotation = ${Math.round(angle)}°` : `Turn ${roundIndex + 1} of ${targets.length}`}</span>
+        <span className="readout-label">{instruction}</span>
       </div>
       <svg
         ref={svgRef}
@@ -132,11 +173,13 @@ export function SpinShapeStep({ step, setChecker, locked }: InteractiveStepProps
         {/* rim circle through the shape's reference point */}
         <circle cx={cxp} cy={cyp} r={r0 * unit} fill="none" stroke="var(--fig-stroke)" strokeOpacity={0.25} strokeWidth={1.5} strokeDasharray="3 5" />
 
-        {/* start ghost */}
+        {/* start ghost (original position, the reference for each turn) */}
         <polygon points={poly(step.shape)} fill="var(--fig-stroke)" opacity={0.1} stroke="var(--fig-stroke)" strokeOpacity={0.3} strokeWidth={1.5} strokeDasharray="2 4" />
 
-        {/* dashed target orientation */}
-        <polygon points={poly(target)} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeDasharray="7 5" strokeLinejoin="round" />
+        {/* dashed target orientation — only as a guide on the first round */}
+        {showTarget && (
+          <polygon points={poly(targetShape)} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeDasharray="7 5" strokeLinejoin="round" />
+        )}
 
         {/* live sweep arc */}
         {Math.abs(angle) > 0.5 && (
@@ -159,11 +202,38 @@ export function SpinShapeStep({ step, setChecker, locked }: InteractiveStepProps
         {/* hub */}
         <circle cx={cxp} cy={cyp} r={5} fill="var(--fig-stroke)" />
         {/* drag handle */}
-        <circle cx={hxp} cy={hyp} r={9} fill="#7c5cff" style={{ cursor: locked ? 'default' : 'grab' }} />
+        <circle cx={hxp} cy={hyp} r={9} fill="#7c5cff" style={{ cursor: frozen ? 'default' : 'grab' }} />
       </svg>
-      <button type="button" className="btn ghost full" disabled={locked || angle === 0} onClick={() => setAngle(0)}>
-        Start over
-      </button>
+
+      {result && !result.ok && (
+        <div className="feedback incorrect">
+          Not quite — that was a {Math.round(result.angle)}° turn. Aim for {turnName(target)} and submit again.
+        </div>
+      )}
+      {result?.ok && !done && (
+        <div className="feedback correct">Nice — {turnName(target)}! Ready for the next one.</div>
+      )}
+      {done && (
+        <div className="feedback correct">
+          All {targets.length} turns nailed — {targets.map((t) => `${norm360(t)}°`).join(', ')}. Press Check below to finish.
+        </div>
+      )}
+
+      {!done &&
+        (awaitingNext ? (
+          <button type="button" className="btn primary full" onClick={nextRound}>
+            Next turn →
+          </button>
+        ) : (
+          <button type="button" className="btn primary full" disabled={frozen || angle === 0} onClick={submit}>
+            Submit rotation
+          </button>
+        ))}
+      {!done && !awaitingNext && (
+        <button type="button" className="btn ghost full" disabled={frozen || angle === 0} onClick={resetAngle}>
+          Start over
+        </button>
+      )}
     </div>
   )
 }

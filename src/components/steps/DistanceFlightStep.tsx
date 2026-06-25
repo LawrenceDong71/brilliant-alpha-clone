@@ -162,9 +162,8 @@ export function DistanceFlightStep({ step, setChecker, locked }: InteractiveStep
           </>
         )}
 
-        {/* you (start) */}
+        {/* start marker */}
         <text x={originPx.x} y={originPx.y - 9} fontSize={16} textAnchor="middle" pointerEvents="none">📍</text>
-        <text x={originPx.x + 2} y={originPx.y + 17} fontSize={11} textAnchor="middle" fill="var(--text)">{step.startLabel ?? 'You'}</text>
 
         {/* draggable crow */}
         <circle

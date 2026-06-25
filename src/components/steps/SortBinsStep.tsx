@@ -2,7 +2,24 @@ import { useEffect, useMemo, useState } from 'react'
 import type { SortBinsStep as SortStep } from '../../content/types'
 import type { InteractiveStepProps } from './stepProps'
 
+type SortItem = SortStep['items'][number]
+
+/** Fisher–Yates shuffle so the tray order never mirrors the bins' order. */
+function shuffle<T>(arr: readonly T[]): T[] {
+  const a = arr.slice()
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const tmp = a[i]
+    a[i] = a[j]
+    a[j] = tmp
+  }
+  return a
+}
+
 export function SortBinsStep({ step, setChecker, locked }: InteractiveStepProps<SortStep>) {
+  // Randomize the item order once when the learner reaches this step, so the
+  // tray isn't a giveaway (star→point, sunbeam→ray, … lined up with the bins).
+  const [order] = useState<SortItem[]>(() => shuffle(step.items))
   const [assign, setAssign] = useState<Record<string, string | null>>(() =>
     Object.fromEntries(step.items.map((i) => [i.id, null])),
   )
@@ -23,7 +40,7 @@ export function SortBinsStep({ step, setChecker, locked }: InteractiveStepProps<
     setSelected(null)
   }
 
-  const tray = step.items.filter((i) => assign[i.id] === null)
+  const tray = order.filter((i) => assign[i.id] === null)
 
   const chip = (id: string, label: string) => (
     <button
@@ -55,7 +72,7 @@ export function SortBinsStep({ step, setChecker, locked }: InteractiveStepProps<
           <div key={bin.id} className="sort-bin" onClick={() => placeIn(bin.id)}>
             <span className="sort-bin-label">{bin.label}</span>
             <div className="sort-bin-items">
-              {step.items
+              {order
                 .filter((i) => assign[i.id] === bin.id)
                 .map((i) => chip(i.id, i.label))}
             </div>

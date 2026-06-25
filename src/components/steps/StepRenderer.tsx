@@ -17,11 +17,24 @@ import { LadderStep } from './LadderStep'
 import { GridShapeStep } from './GridShapeStep'
 import { MirrorGridStep } from './MirrorGridStep'
 import { AngleFillStep } from './AngleFillStep'
+import { AngleLockStep } from './AngleLockStep'
+import { BraceItStep } from './BraceItStep'
 import { SlideShapeStep } from './SlideShapeStep'
 import { MirrorShapeStep } from './MirrorShapeStep'
 import { SpinShapeStep } from './SpinShapeStep'
+import { RapidSymmetryStep } from './RapidSymmetryStep'
+import { SplitSprintStep } from './SplitSprintStep'
 import { BattleshipStep } from './BattleshipStep'
+import { ClockAnglesStep } from './ClockAnglesStep'
 import { AreaBuildStep } from './AreaBuildStep'
+import { ClipSegmentStep } from './ClipSegmentStep'
+import { PythagBalanceStep } from './PythagBalanceStep'
+import { TriangleAreaStep } from './TriangleAreaStep'
+import { DecomposeAreaStep } from './DecomposeAreaStep'
+import { PythagSolveStep } from './PythagSolveStep'
+import { TrussRescueStep } from './TrussRescueStep'
+import { PenShapeStep } from './PenShapeStep'
+import { RapidFireStep } from './RapidFireStep'
 
 interface Props {
   step: Step
@@ -67,16 +80,42 @@ export function StepRenderer({ step, setChecker, locked }: Props) {
       return <MirrorGridStep step={step} setChecker={setChecker} locked={locked} />
     case 'angleFill':
       return <AngleFillStep step={step} setChecker={setChecker} locked={locked} />
+    case 'angleLock':
+      return <AngleLockStep step={step} setChecker={setChecker} locked={locked} />
+    case 'braceIt':
+      return <BraceItStep step={step} setChecker={setChecker} locked={locked} />
     case 'battleship':
       return <BattleshipStep step={step} setChecker={setChecker} locked={locked} />
+    case 'clockAngles':
+      return <ClockAnglesStep step={step} setChecker={setChecker} locked={locked} />
     case 'slideShape':
       return <SlideShapeStep step={step} setChecker={setChecker} locked={locked} />
     case 'mirrorShape':
       return <MirrorShapeStep step={step} setChecker={setChecker} locked={locked} />
     case 'spinShape':
       return <SpinShapeStep step={step} setChecker={setChecker} locked={locked} />
+    case 'symmetryRapid':
+      return <RapidSymmetryStep step={step} setChecker={setChecker} locked={locked} />
+    case 'splitSprint':
+      return <SplitSprintStep step={step} setChecker={setChecker} locked={locked} />
     case 'areaBuild':
       return <AreaBuildStep step={step} setChecker={setChecker} locked={locked} />
+    case 'clipSegment':
+      return <ClipSegmentStep step={step} setChecker={setChecker} locked={locked} />
+    case 'pythagBalance':
+      return <PythagBalanceStep step={step} setChecker={setChecker} locked={locked} />
+    case 'pythagSolve':
+      return <PythagSolveStep step={step} setChecker={setChecker} locked={locked} />
+    case 'triangleArea':
+      return <TriangleAreaStep step={step} setChecker={setChecker} locked={locked} />
+    case 'decomposeArea':
+      return <DecomposeAreaStep step={step} setChecker={setChecker} locked={locked} />
+    case 'penShape':
+      return <PenShapeStep step={step} setChecker={setChecker} locked={locked} />
+    case 'rapidFire':
+      return <RapidFireStep step={step} setChecker={setChecker} locked={locked} />
+    case 'trussRescue':
+      return <TrussRescueStep step={step} setChecker={setChecker} locked={locked} />
     default:
       return null
   }

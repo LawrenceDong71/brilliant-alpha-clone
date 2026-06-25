@@ -17,8 +17,12 @@ export function Header() {
           🔥 {profile?.streak.current ?? 0}
         </span>
         {profile && (
-          <Link to="/profile" className="header-name" title="Edit your profile">
-            {profile.displayName}
+          <Link to="/profile" className="profile-chip" title="Profile & settings">
+            <span className="profile-chip-avatar">
+              {(profile.displayName || '?').charAt(0).toUpperCase()}
+            </span>
+            <span className="profile-chip-name">{profile.displayName}</span>
+            <span className="profile-chip-caret" aria-hidden="true">⌄</span>
           </Link>
         )}
         <button type="button" className="link-btn" onClick={() => void logOut()}>

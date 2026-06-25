@@ -24,8 +24,8 @@ export const LESSONS: Lesson[] = [
       {
         id: 'l1-constellation',
         type: 'connectDots',
-        prompt: 'Tap the stars 1 → 5 in order to draw the constellation Cassiopeia.',
-        instruction: 'Tap each star in number order to connect them.',
+        prompt: 'Tap the stars one by one to link them into the constellation Cassiopeia — connect them in any order you like.',
+        instruction: 'Tap each star to connect it to the last. Any order works.',
         grid: { min: 0, max: 10 },
         dots: [
           { id: 's1', at: { x: 1, y: 3 } },
@@ -38,11 +38,11 @@ export const LESSONS: Lesson[] = [
         feedback: {
           correct: 'You drew a constellation! Each star is a point, and every line you made between two stars is a segment.',
           hints: [
-            'Start at star 1, then tap 2, 3, 4, 5 in order.',
-            'Tapped the wrong one? Hit "Start over" and follow the numbers.',
+            'Tap any star to begin, then keep tapping the others until all five are linked.',
+            'Want a different shape? Hit "Start over" and connect them in another order.',
           ],
           explanation:
-            'Each star is a point — a single location. Connecting two points with a straight path makes a segment. You just built four segments between five points.',
+            'Each star is a point — a single location. Connecting two points with a straight path makes a segment. By linking all five stars you built a constellation out of segments — and the order you chose was up to you.',
         },
       },
       {
@@ -63,23 +63,23 @@ export const LESSONS: Lesson[] = [
       },
       {
         id: 'l1-segment-q',
-        type: 'multipleChoice',
-        prompt: 'Which everyday object is the best example of a segment?',
-        options: [
-          { id: 'a', label: 'A pencil' },
-          { id: 'b', label: 'A single star in the sky' },
-          { id: 'c', label: 'A laser beam shining into space' },
-          { id: 'd', label: 'A straight road with no end in sight' },
-        ],
-        correctOptionId: 'a',
+        type: 'clipSegment',
+        prompt: 'This pencil rests on a line that runs forever both ways. Drag the two stops to clip the line down to just the pencil — that makes a segment.',
+        instruction: 'Drag each stop to a pencil end so the lit part covers only the pencil.',
+        min: 0,
+        max: 10,
+        startTarget: 3,
+        endTarget: 7,
+        tolerance: 0.4,
+        context: 'pencil',
         feedback: {
-          correct: 'Yes — a pencil has two endpoints and a set length, exactly like a segment.',
+          correct: 'That is a segment! Two endpoints and a fixed length — exactly like the pencil.',
           hints: [
-            'A segment has two endpoints and a fixed length.',
-            'Which option clearly starts and stops at two ends?',
+            'A segment has two endpoints. Slide each stop to one end of the pencil.',
+            'Cover the pencil exactly: left stop at the eraser, right stop at the tip.',
           ],
           explanation:
-            'A pencil has two clear ends and a fixed length, so it models a segment. A star is a point, while a laser beam and an endless road keep going (a ray and a line).',
+            'Clipping the endless line at two points leaves a finite piece with two endpoints and a measurable length — that is a segment. Without the stops the line runs forever (no endpoints); with one stop it would be a ray.',
         },
       },
       {
@@ -209,18 +209,18 @@ export const LESSONS: Lesson[] = [
         id: 'l1-battleship',
         type: 'battleship',
         prompt:
-          'Capstone — Battleship! Each shot is a point (a coordinate); each ship is a segment with two endpoints. Sink the enemy fleet, then answer the concept check.',
+          "Capstone — Battleship! Place your fleet, then hunt the enemy's hidden ships one shot at a time. Sink them all to win.",
         size: 8,
         fleet: [2, 3, 4],
         feedback: {
           correct:
-            'Fleet sunk! Every shot was a point; every ship was a segment — two endpoints and a finite, countable length.',
+            'Fleet sunk and every concept check nailed! A shot was a point, a ship was a segment, and a line never ends.',
           hints: [
-            'Sink every enemy ship, then choose the concept answer to finish.',
-            'A ship is a segment: two endpoints with a length you can count (cells = |difference| + 1).',
+            'Sink every enemy ship first — the concept checks unlock once you win.',
+            'Then answer each concept check: think about endpoints (0, 1, or 2) and whether it ever ends.',
           ],
           explanation:
-            'Points locate; segments measure. Each shot named one point (x, y); each ship was a segment you could measure — and that finite length is exactly why it can be sunk.',
+            'Points locate; segments measure. Each shot named one point (x, y); each ship was a segment with two endpoints and a countable length — which is exactly why it could be sunk. A ray (one endpoint) or a line (no endpoints) runs forever, so it never could.',
         },
       },
     ],
@@ -270,7 +270,7 @@ export const LESSONS: Lesson[] = [
       {
         id: 'l2-make-right',
         type: 'angleDrag',
-        prompt: 'Drag the blue ray to build a right angle (90°).',
+        prompt: 'Drag the blue ray to build a right angle.',
         targetDegrees: 90,
         toleranceDegrees: 0,
         startDegrees: 25,
@@ -278,7 +278,7 @@ export const LESSONS: Lesson[] = [
           correct: 'Perfect right angle! That clean square corner is the 90° you find on books, walls, and tiles.',
           hints: [
             'A right angle is a perfect "L" shape — a quarter turn.',
-            'Watch the live readout and aim for exactly 90°.',
+            'Make a perfect square corner — a quarter turn — and watch the live readout.',
           ],
           explanation:
             'A right angle measures exactly 90°, a quarter of a full turn. It forms a square corner like the edge of a book or a wall meeting the floor.',
@@ -338,24 +338,19 @@ export const LESSONS: Lesson[] = [
       },
       {
         id: 'l2-clock',
-        type: 'multipleChoice',
-        prompt: 'The clock reads 3:00. What angle do the two hands make?',
-        figure: { kind: 'clock', hour: 3, minute: 0 },
-        options: [
-          { id: 'a', label: '30°' },
-          { id: 'b', label: '90°' },
-          { id: 'c', label: '180°' },
-          { id: 'd', label: '45°' },
-        ],
-        correctOptionId: 'b',
+        type: 'clockAngles',
+        prompt:
+          'A clock is secretly a protractor — each hour mark is 30°. Drag the two hands to build each angle. (The hands snap to the hour marks.)',
+        targets: [90, 30, 120],
         feedback: {
-          correct: 'Exactly — at 3:00 the hands form a clean right angle, 90°.',
+          correct:
+            'Nicely done — you built a right angle (90°), an acute angle (30°), and an obtuse angle (120°), straight from the hour marks.',
           hints: [
-            'The clock face is split into 12 hours, all the way around (360°).',
-            'From 12 to 3 is a quarter of the way around the clock. A quarter of 360° is…?',
+            'Each hour mark is 30°. Count the hours between the two hands — 3 hours is 90°.',
+            'For 30° put the hands one hour apart; for 120°, four hours apart.',
           ],
           explanation:
-            'A full clock is 360°, divided into 12 hours, so each hour mark is 30°. From 12 to 3 is 3 hours = 3 × 30° = 90°, a right angle.',
+            'A full clock is 360°, divided into 12 hours, so each hour mark is 30°. Counting hour marks between the hands turns the clock into a protractor: 90° is a right angle, 30° is acute, and 120° is obtuse.',
         },
       },
       {
@@ -392,6 +387,22 @@ export const LESSONS: Lesson[] = [
         body: 'Every challenge here was the same idea in disguise: an angle is just how much something turns, measured in degrees. You felt it in a jump shot, built exact right and acute angles, spotted them in everyday objects, and read them off a clock. Next we will snap three angles together into the most important shape in geometry — the triangle.',
         figure: { kind: 'angle', degrees: 90 },
         feedback: { correct: '', hints: [], explanation: '' },
+      },
+      {
+        id: 'l2-rapidfire',
+        type: 'rapidFire',
+        prompt: 'Rapid fire! A ball and a hoop flash up — beat the clock and tap the angle of the shot that sinks it. Trust your eye.',
+        rounds: 7,
+        secondsPerRound: 5,
+        feedback: {
+          correct: 'Sharp eye! You read acute, right, and obtuse shots on instinct — exactly the angle sense this whole lesson was building.',
+          hints: [
+            'Compare the shot to flat (0°), straight up (90°), and leaning back past 90° — is it acute, a right angle, or obtuse?',
+            'A far, low hoop needs a small angle; straight overhead is 90°; a hoop up-and-behind the ball leans past 90° (obtuse).',
+          ],
+          explanation:
+            'Eyeballing an angle is the skill you practiced all lesson: below 90° is acute (shallow), exactly 90° is a right angle (straight up), and between 90° and 180° is obtuse (leaning back over the ball).',
+        },
       },
     ],
   },
@@ -460,43 +471,31 @@ export const LESSONS: Lesson[] = [
         feedback: { correct: '', hints: [], explanation: '' },
       },
       {
-        id: 'l3-fill1',
-        type: 'angleFill',
-        prompt: 'A wheelchair ramp brace is a triangle. Two of its corners are already set at 90° and 35° (laid out for you on the line). Drag to build the third corner so the three angles snap into one straight edge. What does the last corner have to be?',
-        given: [90, 35],
+        id: 'l3-crack',
+        type: 'angleLock',
+        prompt: 'Crack the angle safe. Each tumbler hides a triangle with one corner rubbed out — only the right missing angle will turn it. Work out the third corner, spin the dial to it, and lock each tumbler to pop the safe. There is no gap to eyeball this time: you have to do the math.',
+        snapDegrees: 5,
         tolerance: 0,
-        context: 'ramp brace',
+        dials: [
+          { a: 90, b: 35, context: 'ramp brace' },
+          { a: 60, b: 70, context: 'roof truss' },
+          { a: 105, b: 40, context: 'kite panel' },
+        ],
         feedback: {
-          correct: 'There it is — the gap closes at 55°. And 90 + 35 + 55 = 180. You did not memorize it; you felt the leftover space.',
+          correct: 'Safe cracked! 90+35→55, 60+70→50, 105+40→35 — every missing corner was just 180° minus the two you were given.',
           hints: [
-            'Drag the handle until there is no gap and no overlap — a perfectly flat line.',
-            'The three corners together must equal a straight line: 180°.',
+            'For each dial, add the two known corners, then subtract from 180°.',
+            'Ramp brace: 90 + 35 = 125, so the third is 180 − 125 = 55°. Dial it and lock it.',
+            'The dial snaps in 5° steps, and every answer lands on one — so trust your arithmetic.',
           ],
           explanation:
-            'Two corners use up 90 + 35 = 125°. A straight line is 180°, so the corner that fills the rest is 180 − 125 = 55°.',
-        },
-      },
-      {
-        id: 'l3-fill2',
-        type: 'angleFill',
-        prompt: 'Now a kite panel: two corners measure 105° and 40°. Drag to fill in the last corner until the three pieces lie flat. How small does it have to be?',
-        given: [105, 40],
-        tolerance: 0,
-        context: 'kite panel',
-        feedback: {
-          correct: 'Snapped flat at 35°. Notice the big 105° corner left only a sliver for the rest — the angles always trade off to hit 180°.',
-          hints: [
-            'Close the gap completely so the wedges form a straight line.',
-            '105 + 40 = 145 is already used up. What is left of 180?',
-          ],
-          explanation:
-            'The two known corners total 105 + 40 = 145°. The third must complete the straight line: 180 − 145 = 35°.',
+            'The three interior angles of any triangle add to 180°, so a missing corner is always 180° minus the other two: 180 − 125 = 55°, 180 − 130 = 50°, and 180 − 145 = 35°.',
         },
       },
       {
         id: 'l3-sort',
         type: 'sortBins',
-        prompt: 'Triangles also come in three “flavors.” Each card lists a triangle’s three angles — drop it into the bin you think it belongs in and learn from the feedback. (Hint: keep your eye on the biggest angle in each card.)',
+        prompt: 'Triangles also come in three “flavors.” Each card lists a triangle’s three angles — drop it into the bin you think it belongs in and learn from the feedback.',
         bins: [
           { id: 'acute', label: 'Acute' },
           { id: 'right', label: 'Right' },
@@ -547,6 +546,25 @@ export const LESSONS: Lesson[] = [
           ],
           explanation:
             'The third angle is 180 − 50 − 50 = 80°. The three angles are 50°, 50°, 80° — all under 90° — so the triangle is acute.',
+        },
+      },
+      {
+        id: 'l3-rescue',
+        type: 'trussRescue',
+        prompt: 'Storm damage! Repair the truss bridge before the convoy crosses. For each panel, work out the missing corner, fit the right bracket, then certify the triangle’s type.',
+        panels: [
+          { a: 90, b: 35, context: 'Ramp brace' },
+          { a: 60, b: 70, context: 'Roof truss' },
+          { a: 105, b: 40, context: 'Kite spar', spec: 'Final span — find the corner, then sign off its type.' },
+        ],
+        feedback: {
+          correct: 'Bridge secured! Every panel: the missing corner is 180° minus the two you knew, and its largest angle named the type.',
+          hints: [
+            'For each panel, the third corner is 180° − (the two shown angles).',
+            'Then name it by its largest angle: all under 90° → acute, exactly 90° → right, over 90° → obtuse.',
+          ],
+          explanation:
+            'Each triangle’s interior angles sum to 180°, so the missing corner is 180° minus the two given. The largest of the three angles decides the type: acute (all < 90°), right (one = 90°), or obtuse (one > 90°).',
         },
       },
       {
@@ -625,19 +643,20 @@ export const LESSONS: Lesson[] = [
       },
       {
         id: 'l4-ladder',
-        type: 'ladder',
-        prompt: 'A 10 m fire ladder leans against a building. Slide its base along the ground until the top just reaches the window 8 m up.',
-        ladderLength: 10,
-        windowHeight: 8,
-        tolerance: 0.25,
+        type: 'pythagSolve',
+        prompt: 'A 10 m fire ladder reaches a window 8 m up — the ladder, wall, and ground form a right triangle. How far from the wall is the base? Work it out step by step: drop the right number into each blank.',
+        hypotenuse: 10,
+        knownLeg: 8,
+        targetLeg: 6,
+        context: 'fire ladder',
         feedback: {
-          correct: 'Perfect placement! The base sits 6 m out: 6² + 8² = 36 + 64 = 100 = 10², so the ladder (10 m) reaches exactly.',
+          correct: 'Worked it out! 10² − 8² = 100 − 64 = 36, and √36 = 6, so the base sits 6 m from the wall.',
           hints: [
-            'The ladder length never changes — sliding the base out lowers the top.',
-            'You need base² + 8² = 10². What base makes that true?',
+            'Square each known side first: the ladder is the hypotenuse (10²), the wall is a leg (8²).',
+            'Reverse the theorem: b² = c² − a² = 100 − 64 = 36. The base is √36 — not 100 − 64 left as is, and not 10 − 8.',
           ],
           explanation:
-            'The ladder, wall, and ground form a right triangle with hypotenuse 10 (the ladder). To reach 8 m high: base² + 8² = 10², so base² = 100 − 64 = 36 and base = 6 m.',
+            'The ladder (10) is the hypotenuse and the wall (8) is a known leg, so b² = c² − a² = 10² − 8² = 100 − 64 = 36, giving a base of √36 = 6 m. You square the hypotenuse, subtract the known leg squared, then take the square root to free the missing leg.',
         },
       },
       {
@@ -715,36 +734,58 @@ export const LESSONS: Lesson[] = [
       {
         id: 'l4-sort',
         type: 'sortBins',
-        prompt: 'A triangle is right only if a² + b² = c² for its sides. Test each set of side lengths and sort it.',
+        prompt: 'A triangle is right only if a² + b² = c² for its sides. These numbers are big and ugly on purpose — go ahead and use a calculator — so this really tests whether you can apply the theorem. Square the two shorter sides, add them, and check against the longest side squared. Then sort each set.',
         bins: [
           { id: 'right', label: 'Right triangle' },
           { id: 'not', label: 'Not a right triangle' },
         ],
         items: [
-          { id: 's1', label: '3, 4, 5', correctBin: 'right' },
-          { id: 's2', label: '5, 12, 13', correctBin: 'right' },
-          { id: 's3', label: '5, 6, 7', correctBin: 'not' },
-          { id: 's4', label: '8, 15, 17', correctBin: 'right' },
-          { id: 's5', label: '2, 3, 4', correctBin: 'not' },
-          { id: 's6', label: '6, 8, 10', correctBin: 'right' },
+          { id: 's1', label: '20, 21, 29', correctBin: 'right' },
+          { id: 's2', label: '14, 22, 26', correctBin: 'not' },
+          { id: 's3', label: '16, 30, 34', correctBin: 'right' },
+          { id: 's4', label: '18, 24, 31', correctBin: 'not' },
+          { id: 's5', label: '33, 56, 65', correctBin: 'right' },
+          { id: 's6', label: '20, 30, 36', correctBin: 'not' },
         ],
         feedback: {
-          correct: 'Great testing! Square the two shorter sides, add them, and check against the square of the longest side.',
+          correct: 'Great testing! Square the two shorter sides, add them, and check against the square of the longest side — a calculator makes the big numbers painless.',
           hints: [
-            'Take the longest number as c. Does (shorter)² + (shorter)² equal c²?',
-            'Example: 5,12,13 → 25 + 144 = 169 = 13². That is a right triangle.',
+            'Take the longest number as c. Does (shorter)² + (shorter)² equal c²? Use a calculator for the squares.',
+            'Example: 20, 21, 29 → 400 + 441 = 841 = 29². That is a right triangle.',
           ],
           explanation:
-            'It is a right triangle exactly when the two smaller sides squared add up to the largest side squared. 3,4,5 (9+16=25 ✓), 5,12,13 (25+144=169 ✓), 8,15,17 (64+225=289 ✓), and 6,8,10 (36+64=100 ✓) all pass. 5,6,7 (25+36=61≠49) and 2,3,4 (4+9=13≠16) do not.',
+            'It is a right triangle exactly when the two smaller sides squared add up to the largest squared. 20,21,29 (400+441=841=29² ✓), 16,30,34 (256+900=1156=34² ✓), and 33,56,65 (1089+3136=4225=65² ✓) pass. The others fall just short: 14,22,26 (196+484=680≠676), 18,24,31 (324+576=900≠961), and 20,30,36 (400+900=1300≠1296) — close, but not right triangles.',
         },
       },
       {
         id: 'l4-wrap',
         type: 'concept',
         prompt: 'What you can do now',
-        body: 'One rule did all of it. You grew squares and watched a² + b² always equal c², leaned a ladder to recover a leg, freed a missing leg by subtracting, sized up a TV by its diagonal, retraced a walk as the crow flies, and tested which side-lengths make a true right triangle. Forwards it finds the long side; backwards it finds a leg — and it only ever works because of the square corner.',
+        body: 'One rule did all of it. You grew squares and watched a² + b² always equal c², leaned a ladder to recover a leg, freed a missing leg by subtracting, sized up a TV by its diagonal, retraced a walk as the crow flies, and tested which side-lengths make a true right triangle. Forwards it finds the long side; backwards it finds a leg — and it only ever works because of the square corner. One last job before you go: the workshop.',
         figure: { kind: 'rightTriangle', a: 3, b: 4 },
         feedback: { correct: '', hints: [], explanation: '' },
+      },
+      {
+        id: 'l4-brace',
+        type: 'braceIt',
+        prompt: 'Capstone — Brace It! Each wobbly frame needs one diagonal brace to lock it square. The frame’s two sides are stamped on it, but the brace length is up to you to work out. Cut each board to the right length and fit it to steady every frame.',
+        frames: [
+          { w: 3, h: 4 },
+          { w: 6, h: 8 },
+          { w: 5, h: 12 },
+          { w: 8, h: 15 },
+        ],
+        unit: 'ft',
+        feedback: {
+          correct: 'Every frame locked square! A diagonal brace turns a wobbly rectangle into two rigid right triangles — and its length is always the hypotenuse, c = √(w² + h²).',
+          hints: [
+            'The brace is the diagonal of the frame — the hypotenuse of a right triangle with legs equal to the two sides.',
+            'Square the two sides, add them, take the square root: a 3×4 frame needs a √(9+16) = 5 ft brace.',
+            'The frame is not drawn to scale, so you can’t measure it — you have to compute the brace.',
+          ],
+          explanation:
+            'A rectangular frame racks because its corners can flex. One diagonal brace splits it into two right triangles that can’t change shape, locking it square. That brace spans corner to corner, so its length is the hypotenuse: c = √(w² + h²). For example a 5×12 frame needs √(25+144) = 13 ft.',
+        },
       },
     ],
   },
@@ -759,22 +800,14 @@ export const LESSONS: Lesson[] = [
         id: 'l5-hook',
         type: 'concept',
         prompt: 'Two ways to measure a space',
-        body: 'Say you are redoing a room. To buy carpet, you care about the space inside the floor — that is its area. To buy baseboard trim, you care about the distance around the edge — that is its perimeter. Same room, two completely different measurements. In this lesson you will measure both by hand.',
+        body: 'Say you are redoing a room. To buy carpet, you care about the space inside the floor — that is its area. To buy baseboard trim, you care about the distance around the edge — that is its perimeter. Same room, two completely different measurements. You already have a feel for both — so before any formulas, let us just measure one by hand.',
         figure: { kind: 'areaVsPerimeter', w: 5, h: 3 },
-        feedback: { correct: '', hints: [], explanation: '' },
-      },
-      {
-        id: 'l5-area-concept',
-        type: 'concept',
-        prompt: 'What area really is',
-        body: 'Area is just a count: how many unit squares fit inside a shape with no gaps or overlaps. A "unit square" is 1 unit on each side. Because we are covering a flat space, area is always measured in square units (like square feet or cm²). Let us literally tile a floor to feel it.',
-        figure: { kind: 'unitSquares', w: 5, h: 3 },
         feedback: { correct: '', hints: [], explanation: '' },
       },
       {
         id: 'l5-tile',
         type: 'gridShape',
-        prompt: 'Tile this kitchen floor. Tap every square to lay a 1×1 tile, then count how many it took.',
+        prompt: 'Start with the space inside — no formula yet. Cover this kitchen floor with 1×1 tiles: tap every square, then count how many it took.',
         mode: 'area',
         cols: 5,
         rows: 3,
@@ -796,15 +829,15 @@ export const LESSONS: Lesson[] = [
       {
         id: 'l5-area-insight',
         type: 'concept',
-        prompt: 'The shortcut: width × height',
-        body: 'Counting one tile at a time is slow. Notice the tiles formed 3 rows of 5. Instead of counting all 15, you can multiply: 5 across × 3 up = 15. That is the rule for any rectangle: Area = width × height. The grid is why multiplication works.',
+        prompt: 'What you just measured was area',
+        body: 'What you just did has a name. By covering the floor with unit squares — 1×1 tiles, no gaps, no overlaps — and counting them, you measured its area: the amount of space inside. Because we are covering a flat space, area is counted in square units (square feet, cm², and so on). And notice the tiles fell into 3 rows of 5, so you never have to count one at a time — just multiply: 5 across × 3 up = 15. For any rectangle, Area = width × height.',
         figure: { kind: 'areaProduct', w: 5, h: 3 },
         feedback: { correct: '', hints: [], explanation: '' },
       },
       {
         id: 'l5-area-q',
         type: 'areaBuild',
-        prompt: 'An area rug is 7 units wide and 4 units tall. Roll it out to build its area.',
+        prompt: 'Now use that shortcut. An area rug is 7 wide and 4 tall — roll it out to build its area, no counting one square at a time.',
         width: 7,
         height: 4,
         target: 28,
@@ -821,17 +854,9 @@ export const LESSONS: Lesson[] = [
         },
       },
       {
-        id: 'l5-perimeter-concept',
-        type: 'concept',
-        prompt: 'Now the edge: perimeter',
-        body: 'Perimeter is a different idea entirely. It is the total distance around the outside of a shape — the length of fence you would need to enclose a yard, or trim to frame a picture. You find it by walking the boundary and adding up the lengths. Since it is a length, perimeter is measured in plain units (not squared).',
-        figure: { kind: 'perimeterWalk', w: 5, h: 3 },
-        feedback: { correct: '', hints: [], explanation: '' },
-      },
-      {
         id: 'l5-fence',
         type: 'gridShape',
-        prompt: 'Fence this garden. Tap each edge panel around the outside, then count how many panels of fence it took.',
+        prompt: 'You measured the space inside. Now measure the edge around it — still no formula. Fence this garden: tap each panel around the outside, then count how many panels it took.',
         mode: 'perimeter',
         cols: 5,
         rows: 3,
@@ -853,36 +878,34 @@ export const LESSONS: Lesson[] = [
       {
         id: 'l5-perimeter-insight',
         type: 'concept',
-        prompt: 'The shortcut: 2 × (width + height)',
-        body: 'A rectangle has two widths (top and bottom) and two heights (left and right). So instead of adding four numbers, add one width and one height, then double it: Perimeter = 2 × (width + height). For our garden: 2 × (5 + 3) = 16. Notice area used multiplication; perimeter uses addition.',
+        prompt: 'What you just walked was perimeter',
+        body: 'What you just walked around has a name: the perimeter — the total length of the boundary, like the fence around a yard or the trim around a picture. Because it is a length, perimeter is measured in plain units, not squared. You added all four sides to reach 16, but a rectangle has two equal widths and two equal heights, so add one of each and double it: 2 × (5 + 3) = 16. Area multiplies; perimeter adds.',
         figure: { kind: 'perimeterSides', w: 5, h: 3 },
         feedback: { correct: '', hints: [], explanation: '' },
       },
       {
-        id: 'l5-compare',
-        type: 'multipleChoice',
-        prompt: 'Two dog pens each use 16 m of fencing. Pen A is 6 × 2; Pen B is 4 × 4. Which pen gives the dog more room (area)?',
-        options: [
-          { id: 'a', label: 'Pen B (4 × 4) — it has more area' },
-          { id: 'b', label: 'Pen A (6 × 2) — it has more area' },
-          { id: 'c', label: 'They have the same area' },
-        ],
-        correctOptionId: 'a',
+        id: 'l5-pen',
+        type: 'penShape',
+        prompt: 'Your dog needs room to run. You have exactly 16 m of fence — the same as your neighbor’s skinny 6 × 2 pen. Drag a corner to reshape your pen (the fence length never changes) and give the dog the most room you can.',
+        perimeter: 16,
+        startWidth: 6,
+        rival: { width: 6, height: 2, label: 'Neighbor' },
+        unit: 'm',
         feedback: {
-          correct: 'Right! Same perimeter (16 m), but B’s area is 4 × 4 = 16 vs A’s 6 × 2 = 12. Squarer shapes pack in more area.',
+          correct: 'A 4 × 4 square! Same 16 m of fence, but now 16 m² of room — beating the neighbor’s 12 m². For a fixed perimeter, the squarer the rectangle, the more area it holds.',
           hints: [
-            'Both have the same perimeter — now compare their areas.',
-            'Area A = 6 × 2; Area B = 4 × 4. Which is bigger?',
+            'The fence (perimeter) is stuck at 16 m — only the shape changes. Watch the area as you reshape.',
+            'Long-and-thin wastes space. Try making the sides more even.',
+            'A 4 × 4 square uses the same 16 m of fence but holds the most room: 16 m².',
           ],
           explanation:
-            'Perimeter and area are independent. Both pens have perimeter 16, yet Pen B holds 16 square units and Pen A only 12. For a fixed perimeter, the closer to a square, the larger the area.',
+            'Perimeter and area are independent. With 16 m of fence the width and height must add to 8, and area = width × height is largest when they are equal — a 4 × 4 square gives 16 m², while the 6 × 2 pen gives only 12 m².',
         },
       },
       {
         id: 'l5-lshape',
-        type: 'gridShape',
-        prompt: 'Rooms are not always rectangles. Tile this L-shaped room to find its area.',
-        mode: 'area',
+        type: 'decomposeArea',
+        prompt: 'Rooms are not always rectangles — and width × height alone will not crack this L. Drag the divider to split it into two rectangles you already know how to measure, then count each one, add them, and enter the total area.',
         cols: 4,
         rows: 4,
         cells: [
@@ -891,51 +914,131 @@ export const LESSONS: Lesson[] = [
           [0, 2], [1, 2],
           [0, 3], [1, 3],
         ],
+        total: 12,
         feedback: {
-          correct: 'The L-shaped room holds 12 tiles, so its area is 12 square units.',
+          correct: 'Two rectangles, added up: 8 + 4 = 12 square units.',
           hints: [
-            'Tile the whole L, including the narrow part.',
-            'Tip: split the L into two rectangles and add their areas.',
+            'Drag the divider so each side becomes a full rectangle.',
+            'Split it into a 4×2 and a 2×2, then add their areas.',
           ],
           explanation:
-            'You can split the L into a 4×2 rectangle (8) on the bottom and a 2×2 rectangle (4) on top: 8 + 4 = 12 square units. Breaking a complex shape into rectangles is a powerful trick.',
+            'Breaking a complex shape into rectangles you already know how to measure is the key trick: a 4×2 (8) plus a 2×2 (4) makes 12 square units. (This L splits both ways — a vertical or a horizontal cut both work.)',
+        },
+      },
+      {
+        id: 'l5-triangle-q',
+        type: 'triangleArea',
+        prompt: 'One more shape to crack: a triangular sail. You cannot tile it neatly — so box it inside a rectangle and figure out what fraction of that rectangle it fills. Build the sail’s area.',
+        base: 10,
+        height: 6,
+        target: 30,
+        context: 'sail',
+        unit: ' sq units',
+        feedback: {
+          correct: 'You boxed the sail in — and it filled exactly half. ½ × 10 × 6 = 30 square units.',
+          hints: [
+            'Drag the corner so the rectangle just hugs the triangle: 10 wide, 6 tall.',
+            'The triangle fills half the rectangle: ½ × 10 × 6.',
+          ],
+          explanation:
+            'A 10 × 6 rectangle has area 60; the triangle is exactly half of it, so ½ × 10 × 6 = 30 square units.',
         },
       },
       {
         id: 'l5-triangle-concept',
         type: 'concept',
-        prompt: 'Triangles are half a rectangle',
-        body: 'Slice any rectangle along its diagonal and you get two identical right triangles. So a triangle covers exactly half the rectangle that boxes it in. That gives the rule: Area of a triangle = ½ × base × height, where the height is measured straight up from the base.',
+        prompt: 'A triangle is half a rectangle',
+        body: 'That is what you just found: the sail filled exactly half of the rectangle that boxed it in. Slice any rectangle along its diagonal and you get two identical triangles, so a triangle always covers half its bounding rectangle. That gives the rule: Area of a triangle = ½ × base × height, where the height is measured straight up from the base. For the sail, ½ × 10 × 6 = 30.',
         figure: { kind: 'rightTriangle', a: 4, b: 3 },
         feedback: { correct: '', hints: [], explanation: '' },
-      },
-      {
-        id: 'l5-triangle-q',
-        type: 'multipleChoice',
-        prompt: 'A triangular sail has a base of 10 and a height of 6. What is its area?',
-        options: [
-          { id: 'a', label: '60 sq units' },
-          { id: 'b', label: '30 sq units' },
-          { id: 'c', label: '16 sq units' },
-        ],
-        correctOptionId: 'b',
-        feedback: {
-          correct: 'Yes — ½ × base × height = ½ × 10 × 6 = 30 square units.',
-          hints: [
-            'The triangle is half of a 10 × 6 rectangle.',
-            'Area = ½ × base × height = ½ × 10 × 6.',
-          ],
-          explanation:
-            'A 10 × 6 rectangle has area 60; the triangle is half of it, so ½ × 10 × 6 = 30 square units.',
-        },
       },
       {
         id: 'l5-wrap',
         type: 'concept',
         prompt: 'Putting it together',
-        body: 'Area measures the space inside (in square units): rectangle = width × height, triangle = ½ × base × height. Perimeter measures the distance around (in plain units): rectangle = 2 × (width + height). Two shapes can share a perimeter but not an area — so always ask which one a problem is really after.',
+        body: 'Three tools, all discovered by hand: area is the space inside in square units (rectangle = width × height, triangle = ½ × base × height), and perimeter is the distance around in plain units (rectangle = 2 × (width + height)). Two shapes can share a perimeter yet not an area — so always ask which one the problem is really after. One last challenge: a rapid-fire round to make decomposition automatic.',
         figure: { kind: 'areaFormulas' },
         feedback: { correct: '', hints: [], explanation: '' },
+      },
+      {
+        id: 'l5-split-sprint',
+        type: 'splitSprint',
+        prompt: 'Split Sprint! L-shaped slabs roll down the belt one by one. For each, drag the cutter (flip it ⟷ or ↕) to slice the slab into two clean rectangles, then tap Split before it rolls off. Clear the belt!',
+        secondsPerShape: 8,
+        passRatio: 0.6,
+        shapes: [
+          // Small corner L
+          {
+            cols: 3,
+            rows: 3,
+            cells: [
+              [0, 0], [1, 0], [2, 0],
+              [0, 1],
+              [0, 2],
+            ],
+          },
+          // Wide-footed L
+          {
+            cols: 4,
+            rows: 3,
+            cells: [
+              [0, 0], [1, 0], [2, 0], [3, 0],
+              [0, 1],
+              [0, 2],
+            ],
+          },
+          // Notch in the top-right
+          {
+            cols: 3,
+            rows: 3,
+            cells: [
+              [0, 0], [1, 0], [2, 0],
+              [0, 1], [1, 1], [2, 1],
+              [0, 2], [1, 2],
+            ],
+          },
+          // Chunky L (splits either way)
+          {
+            cols: 4,
+            rows: 4,
+            cells: [
+              [0, 0], [1, 0], [2, 0], [3, 0],
+              [0, 1], [1, 1], [2, 1], [3, 1],
+              [0, 2], [1, 2],
+              [0, 3], [1, 3],
+            ],
+          },
+          // Staircase — only one orientation works
+          {
+            cols: 4,
+            rows: 2,
+            cells: [
+              [0, 0], [1, 0], [2, 0],
+              [1, 1], [2, 1], [3, 1],
+            ],
+          },
+          // Tall L with a top cap
+          {
+            cols: 3,
+            rows: 4,
+            cells: [
+              [2, 0],
+              [2, 1],
+              [2, 2],
+              [0, 3], [1, 3], [2, 3],
+            ],
+          },
+        ],
+        feedback: {
+          correct: 'Belt cleared! You sliced every slab into two rectangles — decomposition on reflex.',
+          hints: [
+            'Aim the cutter at the slab’s inside corner — that is where it breaks into two rectangles.',
+            'If a vertical cut leaves an L on one side, flip the cutter to ↕ (or ⟷) and try the other direction.',
+            'The Split button only lights up when both pieces are full rectangles. Drag until it glows, then tap it.',
+          ],
+          explanation:
+            'Any L-shape (or staircase) is just two rectangles stuck together. One straight cut through the inside corner separates them, and their areas add up to the whole — for example a 4×2 piece (8) plus a 2×2 piece (4) makes 12. Some slabs only break apart one way, so flip the cutter if the first direction leaves a non-rectangle.',
+        },
       },
     ],
   },
@@ -1095,7 +1198,7 @@ export const LESSONS: Lesson[] = [
         id: 'l6-rotate',
         type: 'spinShape',
         prompt:
-          'One move left to discover. Spin the Ferris wheel — drag the car around the hub at the origin and watch the angle climb. Bring it to rest a quarter-turn (90° counterclockwise) on, matching the dashed outline.',
+          'Rotations, for real this time. Spin the Ferris wheel through three turns in a row — first a quarter-turn (90° counterclockwise), then a half-turn (180°), then a three-quarter-turn (270°). Submit each one. The first shows a dashed target to guide you; after that you are on your own.',
         grid: { min: -7, max: 7 },
         shapeLabel: 'car',
         center: { x: 0, y: 0 },
@@ -1107,17 +1210,17 @@ export const LESSONS: Lesson[] = [
           { x: 4, y: 1 },
           { x: 3, y: 1 },
         ],
-        targetAngle: 90,
-        toleranceDegrees: 6,
+        targets: [90, 180, 270],
+        toleranceDegrees: 8,
         snapDegrees: 5,
         feedback: {
-          correct: 'Exactly — a quarter-turn (90° counterclockwise) about the hub swept the car onto the target.',
+          correct: 'Nailed all three — a quarter-turn (90°), a half-turn (180°), and a three-quarter-turn (270°) about the same hub.',
           hints: [
-            'Drag the car the short way counterclockwise — the readout shows your angle as it sweeps.',
-            'A quarter of a full 360° turn is 90°. Stop when the readout reaches 90°.',
+            'Quarter = 90°, half = 180°, three-quarter = 270° — all counterclockwise from the car’s start.',
+            'Drag the car around the hub, then press “Submit rotation” for each turn.',
           ],
           explanation:
-            'Every point turned the same angle about a fixed center, keeping its distance from the center unchanged. A 90° counterclockwise turn about the origin sends (x, y) → (−y, x), swinging the whole car onto the dashed outline.',
+            'Every point turns the same angle about a fixed center, keeping its distance from the center unchanged. A 90° turn about the origin sends (x, y) → (−y, x); 180° sends it to (−x, −y); 270° to (y, −x).',
         },
       },
       {
@@ -1157,6 +1260,22 @@ export const LESSONS: Lesson[] = [
         body: 'You just counted how many times a shape repeats as it spins — that count is its order of rotational symmetry. A 4-blade pinwheel and a square have order 4; a recycling logo, order 3; the letter S matches twice (every half-turn), order 2. Same idea as a line of symmetry, but with turning instead of folding.',
         figure: { kind: 'rotationalSymmetry' },
         feedback: { correct: '', hints: [], explanation: '' },
+      },
+      {
+        id: 'l6-rapid',
+        type: 'symmetryRapid',
+        prompt: 'Rapid fire! Shapes flash by one at a time — tap how many lines of symmetry each has before the timer runs out. Keep your streak alive.',
+        secondsPerShape: 6,
+        rounds: 8,
+        feedback: {
+          correct: 'Lightning round done — you can spot lines of symmetry on sight now.',
+          hints: [
+            'A line of symmetry is a fold that makes the two halves match exactly.',
+            'A regular shape with n sides has n lines; a rectangle has 2, an isosceles triangle 1, a scalene triangle or parallelogram 0.',
+          ],
+          explanation:
+            'A line of symmetry maps a shape onto itself by folding. Regular polygons have as many lines as sides (triangle 3, square 4, pentagon 5, hexagon 6); a rectangle has 2, an isosceles triangle 1, and a scalene triangle or parallelogram has none.',
+        },
       },
       {
         id: 'l6-wrap',

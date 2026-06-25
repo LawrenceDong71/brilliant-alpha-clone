@@ -287,6 +287,59 @@ export interface BattleshipStep extends StepBase {
 }
 
 /**
+ * Build a sequence of target angles using two draggable clock hands. The hands
+ * snap to the 12 hour marks (each hour = 30°), so multiples of 30 are exact.
+ */
+export interface ClockAnglesStep extends StepBase {
+  type: 'clockAngles'
+  /** Target angles (degrees) the learner forms in order, e.g. [90, 30, 120]. */
+  targets: number[]
+}
+
+/**
+ * Discover Area of a triangle = ½ × base × height by boxing a right triangle
+ * inside its bounding rectangle and seeing it fill exactly half.
+ */
+export interface TriangleAreaStep extends StepBase {
+  type: 'triangleArea'
+  base: number
+  height: number
+  /** The triangle's area = base × height / 2. */
+  target: number
+  context?: string
+  unit?: string
+  /** Grid extent (cells on each axis). Defaults to ~max(base, height) + 2. */
+  gridMax?: number
+}
+
+/**
+ * Find a non-rectangle's area by DECOMPOSITION: drag a divider to split the
+ * shape into two rectangles whose areas add up to the total.
+ */
+/**
+ * Rapid-fire "lines of symmetry" round: shapes flash by on a per-shape timer and
+ * the learner taps how many lines of symmetry each has. The shape pool and art
+ * live in the component; the step just tunes pace and length.
+ */
+export interface SymmetryRapidStep extends StepBase {
+  type: 'symmetryRapid'
+  /** Seconds allowed per shape before it auto-misses. Defaults to 6. */
+  secondsPerShape?: number
+  /** How many shapes in one run. Defaults to 8. */
+  rounds?: number
+}
+
+export interface DecomposeAreaStep extends StepBase {
+  type: 'decomposeArea'
+  cols: number
+  rows: number
+  /** Filled cells of the shape, each [col, row]. */
+  cells: Array<[number, number]>
+  /** Expected total area (number of filled cells). */
+  total: number
+}
+
+/**
  * "Slide it home" translation activity. The learner drags a whole polygon (e.g. a
  * boat) across a coordinate grid. A faint ghost marks the start, a live vector arrow
  * runs from the start reference point to the current one with a (Δx, Δy) readout, and
@@ -341,13 +394,182 @@ export interface SpinShapeStep extends StepBase {
   shape: Point[]
   /** Fixed center of rotation. */
   center: Point
-  /** Target rotation in degrees, counterclockwise positive. */
-  targetAngle: number
+  /**
+   * Sequence of target rotations (degrees, counterclockwise positive) the
+   * learner must hit one after another. Each is submitted and checked on its
+   * own; the step completes once every round is cleared.
+   */
+  targets: number[]
   toleranceDegrees: number
   /** Snap increment for the dragged angle (degrees). Defaults to 5. */
   snapDegrees?: number
   /** Cosmetic label drawn on the shape, e.g. "car". */
   shapeLabel?: string
+}
+
+/**
+ * "Clip the segment" activity. A faint infinite line runs across the canvas
+ * (arrows on both ends). A real object (e.g. a pencil) lies along part of it.
+ * The learner drags two endpoint stops along the line to bracket exactly the
+ * object — turning the endless line into a finite segment with two endpoints.
+ */
+export interface ClipSegmentStep extends StepBase {
+  type: 'clipSegment'
+  /** Axis range shown; the line is horizontal at mid-height. */
+  min: number
+  max: number
+  /** Target stop positions along the axis: the object's two ends. */
+  startTarget: number
+  endTarget: number
+  /** Allowed error (axis units) when checking each stop. */
+  tolerance: number
+  /** Cosmetic theme/label for the object on the line. */
+  context?: string
+  instruction?: string
+}
+
+/**
+ * "Brace It!" capstone mini-game for the Pythagorean theorem. Each round shows a wobbly
+ * rectangular frame whose two side lengths are stamped on it; the learner must compute the
+ * diagonal brace length (the hypotenuse, c = √(w² + h²)), cut a board to that length, and
+ * fit it to lock the frame square. The frame is drawn schematically (not to pixel-scale),
+ * so the only way through is to actually apply a² + b² = c². Passes once every frame is braced.
+ */
+export interface BraceItStep extends StepBase {
+  type: 'braceIt'
+  /** Each round's rectangular frame. Use Pythagorean triples so the brace is a whole number. */
+  frames: Array<{ w: number; h: number }>
+  /** Highest length on the cut ruler. Defaults to (max brace + 3). */
+  maxCut?: number
+  unit?: string
+}
+
+/**
+ * "Give the dog room" — fixed-perimeter area discovery. The learner drags a corner of a
+ * rectangular pen whose fence length (perimeter) is fixed, so width and height trade off
+ * (width + height = perimeter / 2). Area = width × height changes as the shape changes and
+ * is maximized by the square. Passes once the learner shapes the pen to its maximum area.
+ */
+export interface PenShapeStep extends StepBase {
+  type: 'penShape'
+  /** Total fence length (perimeter) in units; use a multiple of 4 so the square has integer sides (e.g. 16). */
+  perimeter: number
+  /** Starting width; height is derived as perimeter/2 − width. */
+  startWidth: number
+  /** A reference/rival rectangle drawn faintly for comparison. */
+  rival?: { width: number; height: number; label?: string }
+  /** Unit label, e.g. 'm'. */
+  unit?: string
+}
+
+/**
+ * "Crack the angle safe" combination-lock puzzle. Each dial is a triangle with two
+ * known corners; the learner must work out the missing third corner (the three
+ * interior angles total 180°), spin a protractor needle to it, and lock the tumbler.
+ * There is no target marker and no running sum shown, so the only way through is to
+ * actually compute 180 − a − b. The safe opens once every tumbler is locked.
+ */
+export interface AngleLockStep extends StepBase {
+  type: 'angleLock'
+  dials: Array<{ a: number; b: number; context?: string }>
+  /** Needle snaps to this increment in degrees (default 5). Keep dial answers on it. */
+  snapDegrees?: number
+  /** Allowed slack when matching the dialed value to the answer (default 0). */
+  tolerance?: number
+}
+
+/**
+ * "Balance the squares" — reverse Pythagoras on a balance scale. The square on
+ * the hypotenuse (c²) sits on one pan; the square on the known leg (a²) sits on
+ * the other. The learner grows the missing leg's square (b²) until the two leg
+ * squares balance the hypotenuse square, i.e. a² + b² = c² — revealing leg b.
+ */
+export interface PythagBalanceStep extends StepBase {
+  type: 'pythagBalance'
+  /** Hypotenuse length c (e.g. ladder = 10). */
+  hypotenuse: number
+  /** Known leg length a (e.g. window height = 8). */
+  knownLeg: number
+  /** Expected missing leg b = √(c² − a²) (e.g. 6) — used for range & feedback. */
+  targetLeg: number
+  /** Cosmetic real-world label, e.g. "fire ladder". */
+  context?: string
+}
+
+/**
+ * "Build the solution" — reverse Pythagoras as an assembled calculation. The
+ * learner drags number tiles into the blanks of a worked solution
+ * (c² → a² → c²−a² → √) to find the missing leg. There is no continuous
+ * geometric feedback, so the answer can only be reached by actually computing
+ * each step; the tile pool includes classic trap values.
+ */
+export interface PythagSolveStep extends StepBase {
+  type: 'pythagSolve'
+  /** Hypotenuse length c (e.g. ladder = 10). */
+  hypotenuse: number
+  /** Known leg length a (e.g. window height = 8). */
+  knownLeg: number
+  /** Expected missing leg b = √(c² − a²) (e.g. 6). */
+  targetLeg: number
+  /** Cosmetic real-world label, e.g. "fire ladder". */
+  context?: string
+}
+
+/**
+ * Rapid-fire basketball angle-eyeballing capstone: timed rounds each show a ball
+ * and a hoop in a new configuration; the learner quickly picks the shot angle
+ * (above horizontal) that would sink it. Practices estimating angles by eye.
+ */
+export interface RapidFireStep extends StepBase {
+  type: 'rapidFire'
+  rounds?: number
+  secondsPerRound?: number
+  anglePool?: number[]
+  optionsPerRound?: number
+  passRatio?: number
+}
+
+/**
+ * "Truss Rescue" capstone — repair a storm-damaged truss bridge panel by panel.
+ * For each panel the learner first finds the missing corner angle (180° − the
+ * two shown) by fitting the correct bracket, then certifies the triangle's type
+ * (acute / right / obtuse). The step is solved once every panel is repaired.
+ */
+export interface TrussRescueStep extends StepBase {
+  type: 'trussRescue'
+  panels: Array<{
+    /** Two known interior angles; the third is 180 − a − b. */
+    a: number
+    b: number
+    /** Short real-world label, e.g. "Ramp brace". */
+    context?: string
+    /** Optional flavor spec note shown on the panel. */
+    spec?: string
+  }>
+}
+
+/**
+ * "Split Sprint" — a timed conveyor mini-game that caps the Area & Perimeter
+ * lesson. L-shaped slabs ride in on a belt one at a time; for each, the learner
+ * drags a single cut line (horizontal or vertical) until it slices the slab into
+ * TWO solid rectangles, then locks the cut before the round timer runs out. Each
+ * clear shows the two rectangle areas adding up to the whole — reinforcing "area
+ * by decomposition" from the L-shape step, now as an arcade reflex.
+ */
+export interface SplitSprintStep extends StepBase {
+  type: 'splitSprint'
+  /**
+   * Slabs to clear, presented in random order. Each is a solid region on its own
+   * grid (row 0 at the bottom, like the other grid steps). Every slab MUST be
+   * splittable into two solid rectangles by a single straight cut.
+   */
+  shapes: Array<{ cols: number; rows: number; cells: Array<[number, number]> }>
+  /** Seconds allowed per slab before it rolls off. Defaults to 7. */
+  secondsPerShape?: number
+  /** How many slabs in one run (clamped to shapes.length). Defaults to all. */
+  rounds?: number
+  /** Fraction of rounds that must be cleared to pass the step. Defaults to 0.6. */
+  passRatio?: number
 }
 
 export type Step =
@@ -369,11 +591,24 @@ export type Step =
   | GridShapeStep
   | MirrorGridStep
   | AngleFillStep
+  | AngleLockStep
+  | BraceItStep
+  | PenShapeStep
   | AreaBuildStep
+  | ClipSegmentStep
   | BattleshipStep
+  | ClockAnglesStep
+  | TriangleAreaStep
+  | DecomposeAreaStep
   | SlideShapeStep
   | MirrorShapeStep
   | SpinShapeStep
+  | SymmetryRapidStep
+  | SplitSprintStep
+  | PythagBalanceStep
+  | PythagSolveStep
+  | TrussRescueStep
+  | RapidFireStep
 
 export interface Lesson {
   id: string

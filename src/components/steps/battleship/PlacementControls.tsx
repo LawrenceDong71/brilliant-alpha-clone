@@ -15,8 +15,8 @@ export function PlacementControls(props: PlacementControlsProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <p className="sort-help">
-        Place your fleet: click a START cell, then an END cell to lay each ship. A ship is a
-        SEGMENT — two endpoints and a length.
+        Place your fleet: tap a start cell, then an end cell to lay each ship. Match the ship
+        lengths listed below.
       </p>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>

@@ -53,7 +53,7 @@ export function BattleHud(props: BattleHudProps) {
     statusMessage = 'Enemy is taking aim…'
   } else if (phase === 'battle' && isPlayerTurn) {
     dotColor = 'var(--accent)'
-    statusMessage = 'Your turn — fire a shot (a point).'
+    statusMessage = 'Your turn — fire a shot.'
   } else {
     dotColor = 'var(--muted)'
     statusMessage = 'Place your fleet to begin.'
