@@ -6,6 +6,8 @@ import { HomePage } from './pages/HomePage'
 import { LessonPage } from './pages/LessonPage'
 import { DonePage } from './pages/DonePage'
 import { ProfilePage } from './pages/ProfilePage'
+import { DesignProblemPage } from './pages/DesignProblemPage'
+import { GeneratedLessonPage } from './pages/GeneratedLessonPage'
 
 export default function App() {
   return (
@@ -16,6 +18,8 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/design" element={<DesignProblemPage />} />
+            <Route path="/learn/:topicId" element={<GeneratedLessonPage />} />
             <Route path="/lesson/:lessonId" element={<LessonPage />} />
             <Route path="/done/:lessonId" element={<DonePage />} />
           </Route>

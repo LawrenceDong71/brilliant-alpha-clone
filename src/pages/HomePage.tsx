@@ -2,6 +2,7 @@ import { useEffect, useRef, type CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useIsAdmin } from '../auth/admin'
 import { LESSONS } from '../content/lessons'
+import { TOPICS } from '../ai/curriculum/topics'
 import { useProgress } from '../progress/ProgressContext'
 import { hasPassed, lessonMaxPoints, PASS_RATIO, lessonPoints } from '../progress/scoring'
 
@@ -255,6 +256,53 @@ export function HomePage() {
           )
         })}
       </ol>
+
+      <div className="path-title-row">
+        <h2 className="path-title">Create &amp; explore</h2>
+      </div>
+      <button type="button" className="extra-card" onClick={() => navigate('/design')}>
+        <span className="extra-icon" aria-hidden="true">✨</span>
+        <span className="extra-text">
+          <span className="extra-title">Design a Problem</span>
+          <span className="extra-sub">
+            Describe any real-world scenario; the AI builds a bespoke interactive on the spot
+            (runs sandboxed)
+          </span>
+        </span>
+        <span className="node-go" aria-hidden="true">→</span>
+      </button>
+
+      {completedCount === LESSONS.length && (
+        <>
+          <div className="path-title-row">
+            <h2 className="path-title">Keep going</h2>
+            <span className="admin-badge">New</span>
+          </div>
+          <p className="keepgoing-intro">
+            You finished the core path! Pick a topic and we’ll generate a fresh, verified
+            practice lesson — the course never runs dry.
+          </p>
+          <div className="keepgoing-grid">
+            {TOPICS.map((topic) => (
+              <button
+                key={topic.id}
+                type="button"
+                className="extra-card"
+                onClick={() => navigate(`/learn/${topic.id}`)}
+              >
+                <span className="extra-icon" aria-hidden="true">
+                  <TopicGlyph kind={topic.glyph} />
+                </span>
+                <span className="extra-text">
+                  <span className="extra-title">{topic.title}</span>
+                  <span className="extra-sub">{topic.blurb}</span>
+                </span>
+                <span className="node-go" aria-hidden="true">→</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }

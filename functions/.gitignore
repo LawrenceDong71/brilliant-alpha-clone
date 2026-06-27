@@ -1,0 +1,6 @@
+node_modules/
+lib/
+# Local secrets for the emulator (NEVER commit)
+.secret.local
+.env
+.env.local

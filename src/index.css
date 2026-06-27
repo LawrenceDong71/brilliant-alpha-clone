@@ -696,3 +696,148 @@ button { font-family: inherit; }
 @media (max-width: 420px) {
   .rapid-options { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* ---- AI: Design-a-Problem + home entry cards ---- */
+.extra-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 16px 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  color: var(--text);
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+.extra-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.extra-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 20px;
+}
+.extra-text { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.extra-title { font-weight: 700; color: var(--text-h); }
+.extra-sub { font-size: 13px; color: var(--muted); }
+
+.design-page { max-width: 720px; margin: 0 auto; padding: 8px 0 40px; }
+.design-head { margin: 12px 0 20px; }
+.design-head h1 { margin: 6px 0 6px; color: var(--text-h); }
+.design-sub { color: var(--text); margin: 0; }
+.design-note {
+  margin-top: 10px; font-size: 13px; color: var(--warn);
+  background: var(--warn-bg); padding: 8px 12px; border-radius: 10px; display: inline-block;
+}
+.design-form { display: flex; flex-direction: column; gap: 14px; }
+.design-input {
+  width: 100%;
+  font: inherit;
+  color: var(--text-h);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  resize: vertical;
+}
+.design-input:focus { outline: none; border-color: var(--accent); }
+.design-examples { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.design-result { display: flex; flex-direction: column; gap: 12px; }
+.design-meta { font-size: 14px; color: var(--muted); }
+.design-verified { color: var(--good); font-weight: 700; }
+
+.keepgoing-intro { color: var(--text); margin: -4px 0 6px; font-size: 14px; }
+.keepgoing-grid { display: flex; flex-direction: column; gap: 12px; }
+.keepgoing-grid .extra-icon .node-glyph {
+  width: 26px; height: 26px; stroke: var(--accent); fill: none;
+}
+
+/* ---------- 3D basketball prototype ---------- */
+.bball3d { display: flex; flex-direction: column; gap: 10px; }
+.bball3d-stage {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: radial-gradient(circle at 50% 38%, #f3f5fb 0%, #e4e7f0 70%, #d7dbe7 100%);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+@media (prefers-color-scheme: dark) {
+  .bball3d-stage { background: radial-gradient(circle at 50% 38%, #20243a 0%, #161a2c 70%, #11142a 100%); }
+}
+.bball3d-readout {
+  display: flex; align-items: baseline; gap: 10px; justify-content: center;
+  background: var(--accent-bg); border-radius: 12px; padding: 10px 14px;
+}
+.bball3d-value { font-size: 30px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.bball3d-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ---------- Widget Studio (open-ended generator) ---------- */
+.widget-frame {
+  width: 100%;
+  height: 460px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  display: block;
+}
+/* Break the result out of the narrow 620px column so the visual + text use the
+   available screen width, and give the iframe much more height. */
+.studio-result-wide {
+  width: min(1100px, 94vw);
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+.studio-result-wide .widget-frame {
+  height: min(74vh, 780px);
+  min-height: 540px;
+}
+@media (max-width: 760px) {
+  .studio-result-wide { width: 100%; margin-left: 0; transform: none; }
+  .studio-result-wide .widget-frame { min-height: 420px; }
+}
+
+/* ---------- Sphere lab (AI-generated 3D sphere short lesson) ---------- */
+.sphere-lab { display: flex; flex-direction: column; gap: 12px; }
+.sphere-readouts { display: flex; gap: 8px; }
+.sphere-stat {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: var(--accent-bg); border-radius: 12px; padding: 8px 6px;
+  transition: background 0.2s, color 0.2s;
+}
+.sphere-stat.hit { background: var(--good-bg); }
+.sphere-stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.sphere-stat-value { font-size: 17px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.sphere-stat.hit .sphere-stat-value { color: var(--good); }
+.sphere-slider { width: 100%; accent-color: var(--accent); height: 28px; }
+.sphere-progress { text-align: center; font-size: 13px; min-height: 18px; }
+.sphere-ok { color: var(--good); font-weight: 700; }
+.sphere-muted { color: var(--muted); }
+.sphere-checks { display: flex; flex-direction: column; gap: 12px; }
+.sphere-check { border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.sphere-check.done { border-color: var(--good); background: var(--good-bg); }
+.sphere-check-prompt { font-weight: 600; margin: 0 0 8px; font-size: 14px; }
+.sphere-check-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.sphere-check-explain { margin: 8px 0 0; font-size: 13px; color: var(--good); }
+.chip.good { border-color: var(--good); color: var(--good); background: var(--good-bg); }
+.chip.bad { border-color: var(--bad); color: var(--bad); }

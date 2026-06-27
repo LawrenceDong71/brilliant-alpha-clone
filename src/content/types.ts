@@ -3,7 +3,7 @@ export interface Point {
   y: number
 }
 
-interface Feedback {
+export interface Feedback {
   /** Positive reinforcement shown on a correct answer. */
   correct: string
   /** Escalating hints. hints[0] after the first miss, hints[1] after the second, etc. */

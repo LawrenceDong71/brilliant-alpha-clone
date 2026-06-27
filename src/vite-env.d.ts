@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_STORAGE_BUCKET: string
   readonly VITE_FIREBASE_MESSAGING_SENDER_ID: string
   readonly VITE_FIREBASE_APP_ID: string
+  /** Base URL of the serverless LLM proxy (Cloud Function). When unset, AI is off. */
+  readonly VITE_AI_PROXY_URL?: string
 }
 
 interface ImportMeta {

@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/generateWidget.ts": { "maxDuration": 60 },
+    "api/designProblem.ts": { "maxDuration": 30 }
+  }
+}

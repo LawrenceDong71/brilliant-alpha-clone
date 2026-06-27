@@ -191,6 +191,7 @@ export function SplitSprintStep({ step, setChecker, locked }: InteractiveStepPro
     if (timeLeft <= 0) {
       const shape = step.shapes[order[pos]]
       const cut = findValidCut(shape)
+      /* eslint-disable react-hooks/set-state-in-effect -- intentional: on timeout, reveal the correct cut and end the round */
       if (cut) {
         setOrientation(cut.orientation)
         setSplit(cut.split)
@@ -198,6 +199,7 @@ export function SplitSprintStep({ step, setChecker, locked }: InteractiveStepPro
       } else {
         endRound({ ok: false, aArea: 0, bArea: 0, total: 0 })
       }
+      /* eslint-enable react-hooks/set-state-in-effect */
       return
     }
     const id = window.setTimeout(() => setTimeLeft((t) => +(t - 0.1).toFixed(1)), 100)
