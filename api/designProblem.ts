@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { applyCors } from './_lib/cors.js'
-import { adminAuth } from './_lib/firebaseAdmin.js'
+import { verifyFirebaseToken } from './_lib/verifyToken.js'
 import { lookupCache, saveCache, evictBadCandidate } from './_lib/cache.js'
 import { designCandidate } from './_lib/ai.js'
 
@@ -24,8 +24,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return
   }
   try {
-    await adminAuth().verifyIdToken(match[1])
-  } catch {
+    await verifyFirebaseToken(match[1])
+  } catch (e) {
+    console.error('verifyFirebaseToken failed:', e instanceof Error ? e.message : e)
     res.status(401).json({ error: 'invalid_token' })
     return
   }

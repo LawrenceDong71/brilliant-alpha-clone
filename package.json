@@ -17,6 +17,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.106.0",
     "firebase": "^12.15.0",
+    "jose": "^6.2.3",
     "mathjs": "^15.2.0",
     "openai": "^6.45.0",
     "react": "^19.2.6",

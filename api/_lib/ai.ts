@@ -1,12 +1,11 @@
+import OpenAI from 'openai'
+import Anthropic from '@anthropic-ai/sdk'
+
 /**
  * AI generation logic, ported from the Firebase Cloud Function. On Vercel the
  * provider keys are plain environment variables (OPENAI_API_KEY,
- * ANTHROPIC_API_KEY) rather than Firebase secrets.
- *
- * NOTE: `openai` and `@anthropic-ai/sdk` are ESM-only. Vercel compiles these
- * functions to CommonJS, so a static `import` becomes a `require()` and throws
- * ERR_REQUIRE_ESM at runtime. We load them via dynamic `import()` instead, which
- * works under both CJS and ESM. (firebase-admin is CJS, so static imports are fine.)
+ * ANTHROPIC_API_KEY) rather than Firebase secrets. These functions run as ESM on
+ * Vercel, so static imports of the ESM-only SDKs work natively.
  */
 
 /** Verified-track model; small + cheap (correctness is checked client-side). */
@@ -91,7 +90,6 @@ async function completeText(model: string, system: string, user: string): Promis
   if (model.startsWith('claude')) {
     const key = process.env.ANTHROPIC_API_KEY
     if (!key) throw new Error('ANTHROPIC_API_KEY is not set.')
-    const { default: Anthropic } = await import('@anthropic-ai/sdk')
     const anthropic = new Anthropic({ apiKey: key })
     const msg = await anthropic.messages.create({
       model,
@@ -103,7 +101,6 @@ async function completeText(model: string, system: string, user: string): Promis
   }
   const key = process.env.OPENAI_API_KEY
   if (!key) throw new Error('OPENAI_API_KEY is not set.')
-  const { default: OpenAI } = await import('openai')
   const client = new OpenAI({ apiKey: key })
   const messages = [
     { role: 'system' as const, content: system },
@@ -137,7 +134,6 @@ export async function designCandidate(
 ): Promise<unknown> {
   const key = process.env.OPENAI_API_KEY
   if (!key) throw new Error('OPENAI_API_KEY is not set.')
-  const { default: OpenAI } = await import('openai')
   const client = new OpenAI({ apiKey: key })
   const completion = await client.chat.completions.create({
     model: MODEL,

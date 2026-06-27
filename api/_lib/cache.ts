@@ -1,4 +1,5 @@
 import { FieldValue, type DocumentData } from 'firebase-admin/firestore'
+import OpenAI from 'openai'
 import { adminDb } from './firebaseAdmin.js'
 
 /**
@@ -38,7 +39,6 @@ function cosine(a: number[], b: number[]): number {
 
 async function embed(openaiKey: string, text: string): Promise<number[] | null> {
   try {
-    const { default: OpenAI } = await import('openai')
     const client = new OpenAI({ apiKey: openaiKey })
     const r = await client.embeddings.create({ model: EMBED_MODEL, input: text })
     return r.data[0]?.embedding ?? null
