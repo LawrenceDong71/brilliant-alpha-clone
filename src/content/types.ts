@@ -12,10 +12,26 @@ export interface Feedback {
   explanation: string
 }
 
+/**
+ * Phase 3 (learning science) concept ids. Used for per-concept mastery tracking,
+ * spaced repetition, and interleaved review. v1 = one concept per core lesson;
+ * steps default to their lesson's primary concept (see content/concepts.ts) and
+ * may override with an explicit `concept` tag later.
+ */
+export type ConceptId =
+  | 'points-lines'
+  | 'angles'
+  | 'triangles'
+  | 'pythagorean'
+  | 'area-perimeter'
+  | 'transformations'
+
 interface StepBase {
   id: string
   prompt: string
   feedback: Feedback
+  /** Phase 3: optional concept override; defaults to the lesson's primary concept. */
+  concept?: ConceptId
 }
 
 /** Small static illustrations used by concept / multiple-choice steps. */
@@ -57,7 +73,12 @@ export interface ConceptStep extends StepBase {
 export interface MultipleChoiceStep extends StepBase {
   type: 'multipleChoice'
   figure?: Figure
-  options: { id: string; label: string }[]
+  /**
+   * `whyWrong` (Phase 3, FR-F2): an answer-specific explanation shown when THIS
+   * option is picked and checked — teaches the misconception without revealing
+   * the correct answer.
+   */
+  options: { id: string; label: string; whyWrong?: string }[]
   correctOptionId: string
 }
 

@@ -71,6 +71,13 @@ export async function lookupCache<T>(
   collection: string,
   scenario: string,
   openaiKey: string,
+  /**
+   * When true, only the exact-normalized match is used — the semantic layer is
+   * skipped entirely. Used by Daily Review variants, which are intentionally
+   * near-identical prompts that should each be cached/served on their own rather
+   * than collapsed together by cosine similarity.
+   */
+  exactOnly = false,
 ): Promise<CacheLookup<T>> {
   const normalized = normalizeScenario(scenario)
   try {
@@ -88,6 +95,9 @@ export async function lookupCache<T>(
         matchedScenario: d.scenario as string,
       }
     }
+
+    // Exact-only callers stop here: a different variant must generate fresh.
+    if (exactOnly) return { hit: false, embedding: null }
 
     // 2) Semantic match — embed and compare against recent entries in-memory.
     const embedding = await embed(openaiKey, normalized)
@@ -125,6 +135,8 @@ export async function saveCache<T>(
   scenario: string,
   result: T,
   embedding: number[] | null,
+  /** Extra fields merged into the doc (e.g. { kind: 'review' } for flushing). */
+  extra: Record<string, unknown> = {},
 ): Promise<void> {
   try {
     const db = getFirestore()
@@ -134,6 +146,7 @@ export async function saveCache<T>(
       embedding: embedding ?? null,
       result,
       createdAt: FieldValue.serverTimestamp(),
+      ...extra,
     })
   } catch {
     // Best-effort: a failed cache write must never break the request.

@@ -27,6 +27,30 @@ function checkFeedback(step: GeneratableStep, push: (code: string, message: stri
 }
 
 /**
+ * Guards against prose/structure drift (esp. in creative mode): every number the
+ * prompt or feedback mentions must be one of the problem's legitimate values
+ * (the structured fields + their derived values). Catches e.g. a prompt that
+ * says "7 ft" while the buildable rectangle is actually 5 — which would make the
+ * interactive impossible to complete. Numbers ≤ 2 are ignored (½, "by 2", etc.).
+ */
+function checkNumberConsistency(
+  step: GeneratableStep,
+  allowed: number[],
+  push: (code: string, message: string) => void,
+): void {
+  const text = [step.prompt, step.feedback.correct, step.feedback.explanation, ...step.feedback.hints].join('  ')
+  const found = (text.match(/\d+(?:\.\d+)?/g) ?? []).map(Number)
+  const allow = new Set(allowed)
+  const leaks = [...new Set(found.filter((n) => n > 2 && !allow.has(n)))]
+  if (leaks.length > 0) {
+    push(
+      'consistency/number-leak',
+      `the prompt/feedback mention numbers (${leaks.join(', ')}) that don't match the problem's actual values — every stated number must equal the structured fields (e.g. the dimensions you describe must be the ones built).`,
+    )
+  }
+}
+
+/**
  * The §2.5 verification suite for a single generated step: schema is assumed
  * (see parseStep); this re-derives the answer with mathjs (consistency), and
  * enforces bounds, non-degeneracy, and feedback presence. Returns every failure
@@ -46,6 +70,7 @@ export function verifyStep(step: GeneratableStep): VerifyResult {
         if (!approxEqual(target, oracle('w * h', { w: width, h: height })))
           push('consistency/target', `target must equal width*height (${width * height}).`)
         checkFeedback(step, push)
+        checkNumberConsistency(step, [width, height, target], push)
       })
 
     case 'triangleArea':
@@ -59,6 +84,7 @@ export function verifyStep(step: GeneratableStep): VerifyResult {
           push('consistency/target', `target must equal base*height/2 (${(base * height) / 2}).`)
         if (target <= 0) push('degenerate/area', 'area must be positive.')
         checkFeedback(step, push)
+        checkNumberConsistency(step, [base, height, target, base * height], push)
       })
 
     case 'pythagSolve':
@@ -79,6 +105,11 @@ export function verifyStep(step: GeneratableStep): VerifyResult {
         if (!approxEqual(lhs, rhs))
           push('consistency/pythagorean', 'knownLeg^2 + targetLeg^2 must equal hypotenuse^2.')
         checkFeedback(step, push)
+        checkNumberConsistency(
+          step,
+          [hypotenuse, knownLeg, targetLeg, hypotenuse ** 2, knownLeg ** 2, targetLeg ** 2],
+          push,
+        )
       })
 
     case 'angleLock':
@@ -96,6 +127,9 @@ export function verifyStep(step: GeneratableStep): VerifyResult {
             push(`solvable/dial-${i}`, `dial ${i}: the answer ${third} must land on the ${snap}° snap grid.`)
         })
         checkFeedback(step, push)
+        const allowedAngles = [180]
+        step.dials.forEach((d) => allowedAngles.push(d.a, d.b, 180 - d.a - d.b, d.a + d.b))
+        checkNumberConsistency(step, allowedAngles, push)
       })
   }
 }

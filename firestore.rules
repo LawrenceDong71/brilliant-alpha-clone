@@ -18,6 +18,11 @@ service cloud.firestore {
         allow read, write: if isAdmin() ||
           (request.auth != null && request.auth.uid == uid);
       }
+
+      match /conceptMastery/{conceptId} {
+        allow read, write: if isAdmin() ||
+          (request.auth != null && request.auth.uid == uid);
+      }
     }
   }
 }

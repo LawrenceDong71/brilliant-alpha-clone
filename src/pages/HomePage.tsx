@@ -2,9 +2,11 @@ import { useEffect, useRef, type CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useIsAdmin } from '../auth/admin'
 import { LESSONS } from '../content/lessons'
+import { CONCEPTS, conceptName } from '../content/concepts'
 import { TOPICS } from '../ai/curriculum/topics'
 import { useProgress } from '../progress/ProgressContext'
-import { hasPassed, lessonMaxPoints, PASS_RATIO, lessonPoints } from '../progress/scoring'
+import { lessonMaxPoints, lessonPoints } from '../progress/scoring'
+import { isConceptMastered } from '../progress/review'
 
 /** Maps each lesson to a geometry glyph drawn inside its node. */
 const KIND_BY_ID: Record<string, string> = {
@@ -92,7 +94,8 @@ function HeroDecor() {
 
 export function HomePage() {
   const navigate = useNavigate()
-  const { profile, progress, loading, error, isUnlocked, recommendedLessonId } = useProgress()
+  const { profile, progress, loading, error, isUnlocked, recommendedLessonId, conceptMastery, dueConceptIds, lessonMastered } =
+    useProgress()
   const admin = useIsAdmin()
 
   // Decorative only: nudge the backdrop shapes toward the cursor (parallax) and
@@ -212,13 +215,13 @@ export function HomePage() {
           const inProgress = !done && unlocked && p && p.currentStepIndex > 0
           const points = lessonPoints(lesson, p?.steps ?? {})
           const maxPoints = lessonMaxPoints(lesson)
-          const passed = done && hasPassed(points, maxPoints)
+          const mastered = lessonMastered(lesson)
           const kind = KIND_BY_ID[lesson.id] ?? 'point'
-          const pip = done ? (passed ? '✓' : '↻') : unlocked ? null : '🔒'
+          const pip = done ? (mastered ? '✓' : '↻') : unlocked ? null : '🔒'
           return (
             <li
               key={lesson.id}
-              className={`path-node${unlocked ? '' : ' locked'}${done ? ' done' : ''}${done && !passed ? ' failed' : ''}${recommended ? ' recommended' : ''}`}
+              className={`path-node${unlocked ? '' : ' locked'}${done ? ' done' : ''}${done && !mastered ? ' failed' : ''}${recommended ? ' recommended' : ''}`}
             >
               <button
                 type="button"
@@ -238,16 +241,16 @@ export function HomePage() {
                   <span className="node-summary">{lesson.summary}</span>
                   <span className="node-meta">
                     {done
-                      ? passed
-                        ? `Completed · ${points}/${maxPoints} pts`
-                        : `${points}/${maxPoints} pts · replay to unlock next`
+                      ? mastered
+                        ? `Mastered ✓ · ${points}/${maxPoints} pts`
+                        : `${points}/${maxPoints} pts · review to master & unlock next`
                       : recommended
                         ? 'Recommended next'
                         : inProgress
                           ? 'In progress'
                           : unlocked
                             ? `${lesson.estimatedMinutes} min`
-                            : `Locked · score ${Math.round(PASS_RATIO * 100)}%+`}
+                            : 'Locked · master the previous lesson'}
                   </span>
                 </span>
                 {unlocked && <span className="node-go" aria-hidden="true">→</span>}
@@ -271,6 +274,49 @@ export function HomePage() {
         </span>
         <span className="node-go" aria-hidden="true">→</span>
       </button>
+
+      <div className="path-title-row">
+        <h2 className="path-title">Review &amp; retention</h2>
+        {dueConceptIds.length > 0 && <span className="admin-badge">{dueConceptIds.length} due</span>}
+      </div>
+      <button type="button" className="extra-card" onClick={() => navigate('/review')}>
+        <span className="extra-icon" aria-hidden="true">🔁</span>
+        <span className="extra-text">
+          <span className="extra-title">Daily Review</span>
+          <span className="extra-sub">
+            {dueConceptIds.length > 0
+              ? `${dueConceptIds.length} concept${dueConceptIds.length > 1 ? 's' : ''} due — a quick mixed review, weakest concepts first`
+              : 'A quick mixed review of every concept — weakest first'}
+          </span>
+        </span>
+        <span className="node-go" aria-hidden="true">→</span>
+      </button>
+
+      {Object.keys(conceptMastery).length > 0 && (
+        <div className="retention-panel">
+          {CONCEPTS.map((c) => {
+            const m = conceptMastery[c.id]
+            const level = m?.level ?? 0
+            const seen = !!m && m.lastSeen > 0
+            const mastered = isConceptMastered(m)
+            const due = dueConceptIds.includes(c.id)
+            const pct = Math.round(level * 100)
+            const status = !seen ? 'Not started' : mastered ? 'Mastered ✓' : due ? 'Due for review' : 'Learning'
+            return (
+              <div key={c.id} className="retention-row">
+                <span className="retention-name">{conceptName(c.id)}</span>
+                <span className="retention-bar">
+                  <span
+                    className={`retention-fill${mastered ? ' mastered' : ''}${due ? ' due' : ''}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </span>
+                <span className="retention-status">{status}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {completedCount === LESSONS.length && (
         <>

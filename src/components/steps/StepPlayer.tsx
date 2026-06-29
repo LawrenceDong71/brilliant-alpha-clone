@@ -4,7 +4,8 @@ import { StepRenderer } from './StepRenderer'
 
 interface Props {
   step: Step
-  onSolved?: () => void
+  /** Called when solved; `firstTry` is true if solved with no wrong attempts. */
+  onSolved?: (firstTry: boolean) => void
 }
 
 /**
@@ -26,10 +27,17 @@ export function StepPlayer({ step, onSolved }: Props) {
   const check = () => {
     if (checkerRef.current()) {
       setSolved(true)
-      onSolved?.()
+      onSolved?.(attempts === 0)
     } else {
       setAttempts((a) => a + 1)
     }
+  }
+
+  // A self-contained step (e.g. AngleLock) solved itself via its own action.
+  const autoComplete = () => {
+    if (solved) return
+    setSolved(true)
+    onSolved?.(attempts === 0)
   }
 
   const hint =
@@ -41,7 +49,7 @@ export function StepPlayer({ step, onSolved }: Props) {
     <div className="lesson-body">
       <h2 className="step-prompt">{step.prompt}</h2>
 
-      <StepRenderer key={step.id} step={step} setChecker={setChecker} locked={solved} />
+      <StepRenderer key={step.id} step={step} setChecker={setChecker} locked={solved} onAutoComplete={autoComplete} />
 
       {solved && (
         <div className="feedback correct">

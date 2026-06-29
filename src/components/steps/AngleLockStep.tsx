@@ -16,7 +16,7 @@ const polar = (deg: number, r: number): Point => {
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 
-export function AngleLockStep({ step, setChecker, locked }: InteractiveStepProps<LockStep>) {
+export function AngleLockStep({ step, setChecker, locked, onAutoComplete }: InteractiveStepProps<LockStep>) {
   const dials = step.dials
   const snap = step.snapDegrees ?? 5
   const tol = step.tolerance ?? 0
@@ -67,10 +67,14 @@ export function AngleLockStep({ step, setChecker, locked }: InteractiveStepProps
   const lockIn = () => {
     if (locked || allCracked) return
     if (Math.abs(needle - answer) <= tol) {
+      const willComplete = current + 1 >= dials.length
       setSolved((s) => [...s, needle])
       setCurrent((c) => c + 1)
       setNeedle(90)
       setWrong(false)
+      // Last tumbler cracked → the whole step is solved; tell the player so the
+      // learner doesn't also have to press a separate "Check" button.
+      if (willComplete) onAutoComplete?.()
     } else {
       setWrong(true)
       setShake(true)

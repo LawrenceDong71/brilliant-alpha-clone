@@ -20,7 +20,7 @@ export const proxyProvider: AiProvider = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ scenario: input.scenario, repair: input.repair }),
+      body: JSON.stringify({ scenario: input.scenario, repair: input.repair, creative: input.creative }),
     })
 
     if (!res.ok) {
@@ -42,7 +42,7 @@ export const proxyProvider: AiProvider = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ scenario: input.scenario, model: input.model }),
+      body: JSON.stringify({ scenario: input.scenario, model: input.model, exact: input.exact }),
     })
 
     if (!res.ok) {

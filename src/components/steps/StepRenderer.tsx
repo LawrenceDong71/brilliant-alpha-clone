@@ -40,9 +40,11 @@ interface Props {
   step: Step
   setChecker: (fn: () => boolean) => void
   locked: boolean
+  /** Called by self-completing steps (e.g. AngleLock) when fully solved. */
+  onAutoComplete?: () => void
 }
 
-export function StepRenderer({ step, setChecker, locked }: Props) {
+export function StepRenderer({ step, setChecker, locked, onAutoComplete }: Props) {
   switch (step.type) {
     case 'concept':
       return <ConceptStep step={step} />
@@ -81,7 +83,7 @@ export function StepRenderer({ step, setChecker, locked }: Props) {
     case 'angleFill':
       return <AngleFillStep step={step} setChecker={setChecker} locked={locked} />
     case 'angleLock':
-      return <AngleLockStep step={step} setChecker={setChecker} locked={locked} />
+      return <AngleLockStep step={step} setChecker={setChecker} locked={locked} onAutoComplete={onAutoComplete} />
     case 'braceIt':
       return <BraceItStep step={step} setChecker={setChecker} locked={locked} />
     case 'battleship':

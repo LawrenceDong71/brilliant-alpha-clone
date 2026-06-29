@@ -12,10 +12,15 @@ import Anthropic from '@anthropic-ai/sdk'
 const MODEL = process.env.OPENAI_MODEL ?? 'gpt-4o-mini'
 
 /** Open-ended "Invent Engine" model. Claude ids route to Anthropic. */
-const CODEGEN_MODEL = process.env.CODEGEN_MODEL ?? 'gpt-4.1-mini'
+const CODEGEN_MODEL = process.env.CODEGEN_MODEL ?? 'gpt-5.5'
 
-/** Hard ceiling on generated length — keeps latency (and cost) bounded. */
-const CODEGEN_MAX_TOKENS = 4000
+/**
+ * Hard ceiling on generated length — keeps latency (and cost) bounded. Raised so
+ * a stronger (reasoning-capable) codegen model has room for its reasoning tokens
+ * AND a complete HTML document without being truncated mid-tag (which would
+ * render as a broken widget).
+ */
+const CODEGEN_MAX_TOKENS = 8000
 
 const SYSTEM_PROMPT = `You convert a short real-world scenario into ONE interactive geometry problem,
 returned as a single JSON object and nothing else.
@@ -44,6 +49,33 @@ internally consistent (this will be independently re-checked; inconsistent outpu
 
 F (feedback) = { "correct":string (non-empty), "hints":string[] (1-3), "explanation":string (non-empty) }.
 Every number you write in feedback must be correct for the problem. Output JSON only — no markdown, no prose.`
+
+/**
+ * Phase 3 (FR-R3c) creative latitude for spaced-review variants. Appended to the
+ * system prompt when `creative` is requested. Encourages fresh, surprising
+ * scenarios and varied numbers — WITHIN the verifiable schema/ranges, since the
+ * answer is still independently re-checked.
+ */
+const CREATIVE_ADDENDUM = `
+
+CREATIVE MODE (spaced-review variant): Be genuinely creative and surprising.
+- Invent a vivid, unexpected real-world scenario — NOT a generic "rectangle"/"triangle". Think
+  skate ramps, pizza boxes, drone flight paths, treehouse roofs, flag designs, garden mazes, etc.
+- Choose varied, non-obvious numbers WITHIN the allowed ranges (avoid always using the smallest or
+  roundest values; make the learner actually compute).
+- Write a lively, fresh prompt and feedback — do not copy textbook phrasing.
+- Each generation should feel different from the last.
+
+CRITICAL NUMBER CONSISTENCY (do not violate):
+- The numbers you state in the "prompt" and in all feedback text MUST be EXACTLY the structured
+  values. For areaBuild the two dimensions in the prompt MUST equal "width" and "height" (and any
+  area mentioned MUST equal "target"). For triangleArea use "base"/"height". For pythagSolve use the
+  given leg and hypotenuse. For angleLock state the two known angles ("a","b").
+- Do NOT mention ANY number that isn't one of the problem's real measurements (no incidental numbers
+  like years, counts of people, prices, etc.). A learner builds/measures the STRUCTURED values, so a
+  mismatched number in the prose makes the activity impossible.
+
+Stay strictly within the schema and keep prose + structure perfectly consistent (it is verified).`
 
 const WIDGET_SYSTEM_PROMPT = `You are a world-class creative coder AND a math educator. You INVENT, from scratch, a
 bespoke, visually realistic, INTERACTIVE MINI-LESSON for the given real-world scenario — choosing the
@@ -127,20 +159,26 @@ export function pickCodegenModel(requested: unknown): string {
   return /^(gpt-|o1|o3|o4|claude-)/.test(r) ? r : CODEGEN_MODEL
 }
 
-/** Verified-track: ask the model for one candidate step as parsed JSON. */
+/**
+ * Verified-track: ask the model for one candidate step as parsed JSON.
+ * `creative` (Phase 3 review variants) loosens the prompt for fresh, surprising
+ * scenarios + varied numbers and raises temperature, while staying verifiable.
+ */
 export async function designCandidate(
   scenario: string,
   repair?: { previous?: unknown; failures?: unknown },
+  opts?: { creative?: boolean },
 ): Promise<unknown> {
   const key = process.env.OPENAI_API_KEY
   if (!key) throw new Error('OPENAI_API_KEY is not set.')
+  const creative = opts?.creative === true
   const client = new OpenAI({ apiKey: key })
   const completion = await client.chat.completions.create({
     model: MODEL,
-    temperature: 0.4,
+    temperature: creative ? 0.7 : 0.4,
     response_format: { type: 'json_object' },
     messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: creative ? SYSTEM_PROMPT + CREATIVE_ADDENDUM : SYSTEM_PROMPT },
       { role: 'user', content: buildUserPrompt(scenario, repair) },
     ],
   })

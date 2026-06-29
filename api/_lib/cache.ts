@@ -55,10 +55,20 @@ export interface CacheLookup<T> {
   matchedScenario?: string
 }
 
+export interface LookupOptions {
+  /** Skip the semantic layer; only an exact-normalized match counts. Used by
+   *  Daily Review variants so near-identical themed prompts aren't merged. */
+  exactOnly?: boolean
+  /** Treat a matched entry older than this many ms as a miss, and delete it.
+   *  This is how Daily Review "flushes" stale questions so they don't repeat. */
+  maxAgeMs?: number
+}
+
 export async function lookupCache<T>(
   collection: string,
   scenario: string,
   openaiKey: string,
+  opts: LookupOptions = {},
 ): Promise<CacheLookup<T>> {
   const normalized = normalizeScenario(scenario)
   try {
@@ -67,7 +77,21 @@ export async function lookupCache<T>(
     // 1) Exact (normalized) fast path — identical wording, no embedding needed.
     const exact = await db.collection(collection).where('normalized', '==', normalized).limit(1).get()
     if (!exact.empty) {
-      const d = exact.docs[0].data()
+      const doc = exact.docs[0]
+      const d = doc.data()
+      // TTL: if this entry is too old, delete it and regenerate (keeps review fresh).
+      if (opts.maxAgeMs != null) {
+        const createdMs: number =
+          typeof d.createdAt?.toMillis === 'function' ? d.createdAt.toMillis() : 0
+        if (createdMs && Date.now() - createdMs > opts.maxAgeMs) {
+          try {
+            await doc.ref.delete()
+          } catch {
+            // best-effort flush
+          }
+          return { hit: false, embedding: null }
+        }
+      }
       return {
         hit: true,
         result: d.result as T,
@@ -76,6 +100,10 @@ export async function lookupCache<T>(
         matchedScenario: d.scenario as string,
       }
     }
+
+    // Exact-only callers (e.g. Daily Review variants) stop here: a different
+    // themed variant must generate fresh rather than match a similar one.
+    if (opts.exactOnly) return { hit: false, embedding: null }
 
     // 2) Semantic match — embed and compare against recent entries in-memory.
     const embedding = await embed(openaiKey, normalized)
@@ -111,6 +139,8 @@ export async function saveCache<T>(
   scenario: string,
   result: T,
   embedding: number[] | null,
+  /** Extra fields merged into the doc (e.g. { kind: 'review' }). */
+  extra: Record<string, unknown> = {},
 ): Promise<void> {
   try {
     await adminDb()
@@ -121,6 +151,7 @@ export async function saveCache<T>(
         embedding: embedding ?? null,
         result,
         createdAt: FieldValue.serverTimestamp(),
+        ...extra,
       })
   } catch {
     // Best-effort: a failed cache write must never break the request.

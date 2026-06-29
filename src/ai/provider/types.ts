@@ -15,6 +15,11 @@ export interface DesignProblemInput {
     previous: unknown
     failures: string[]
   }
+  /**
+   * Phase 3 (FR-R3c): spaced-review variant — ask the model for a fresh, creative
+   * problem (varied numbers/scenarios) and bypass the cache for novelty.
+   */
+  creative?: boolean
 }
 
 /** Input for the open-ended widget generator. */
@@ -22,6 +27,11 @@ export interface WidgetInput {
   scenario: string
   /** Optional per-request model id from the UI picker (server allowlists it). */
   model?: string
+  /**
+   * When true, the server caches this scenario by exact match only (no semantic
+   * dedupe). Daily Review uses it so near-identical themed variants stay distinct.
+   */
+  exact?: boolean
 }
 
 /** Output of the open-ended widget generator. */

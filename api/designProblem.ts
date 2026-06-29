@@ -31,12 +31,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return
   }
 
-  const body = (req.body ?? {}) as { scenario?: unknown; repair?: { previous?: unknown; failures?: unknown } }
+  const body = (req.body ?? {}) as {
+    scenario?: unknown
+    repair?: { previous?: unknown; failures?: unknown }
+    creative?: unknown
+  }
   if (typeof body.scenario !== 'string' || !body.scenario.trim()) {
     res.status(400).json({ error: 'scenario_required' })
     return
   }
   const scenario = body.scenario
+  // Phase 3 review variants: creative mode bypasses the cache so every review is
+  // a fresh, surprising problem (no cache read or write).
+  const creative = body.creative === true
 
   const openaiKey = process.env.OPENAI_API_KEY
   if (!openaiKey) {
@@ -50,7 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   let embedding: number[] | null = null
   if (isRepair) {
     await evictBadCandidate(DESIGN_CACHE, scenario, body.repair?.previous)
-  } else {
+  } else if (!creative) {
     const cached = await lookupCache<unknown>(DESIGN_CACHE, scenario, openaiKey)
     if (cached.hit) {
       res.status(200).json(cached.result)
@@ -60,9 +67,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   try {
-    const parsed = await designCandidate(scenario, body.repair)
+    const parsed = await designCandidate(scenario, body.repair, { creative })
     if (
       !isRepair &&
+      !creative &&
       parsed &&
       typeof parsed === 'object' &&
       typeof (parsed as { type?: unknown }).type === 'string'

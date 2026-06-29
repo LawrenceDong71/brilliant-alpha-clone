@@ -9,8 +9,11 @@ import {
 import type { User } from 'firebase/auth'
 import { db } from '../lib/firebase'
 import { dayDiff, localDateStr } from '../lib/dates'
+import type { ConceptId } from '../content/types'
 import {
   emptyStreak,
+  type ConceptMastery,
+  type ConceptMasteryMap,
   type LessonProgress,
   type ProgressMap,
   type StreakState,
@@ -20,6 +23,8 @@ import {
 const userRef = (uid: string) => doc(db, 'users', uid)
 const progressRef = (uid: string, lessonId: string) =>
   doc(db, 'users', uid, 'progress', lessonId)
+const conceptRef = (uid: string, conceptId: string) =>
+  doc(db, 'users', uid, 'conceptMastery', conceptId)
 
 export async function ensureUserProfile(
   user: User,
@@ -74,6 +79,21 @@ export async function saveStreak(
   streak: StreakState,
 ): Promise<void> {
   await updateDoc(userRef(uid), { streak })
+}
+
+/** Phase 3: load all per-concept mastery records for a user. */
+export async function fetchConceptMastery(uid: string): Promise<ConceptMasteryMap> {
+  const snap = await getDocs(collection(db, 'users', uid, 'conceptMastery'))
+  const map: ConceptMasteryMap = {}
+  snap.forEach((d) => {
+    map[d.id as ConceptId] = d.data() as ConceptMastery
+  })
+  return map
+}
+
+/** Phase 3: persist one concept's mastery record. */
+export async function saveConceptMastery(uid: string, mastery: ConceptMastery): Promise<void> {
+  await setDoc(conceptRef(uid, mastery.concept), mastery)
 }
 
 /** Persist editable profile fields (display name / email) to the user doc. */

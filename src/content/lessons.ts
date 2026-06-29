@@ -95,10 +95,10 @@ export const LESSONS: Lesson[] = [
         type: 'multipleChoice',
         prompt: 'A flashlight beam starts at the bulb and shines off into the distance. Which geometry object is it most like?',
         options: [
-          { id: 'a', label: 'A point' },
-          { id: 'b', label: 'A segment' },
+          { id: 'a', label: 'A point', whyWrong: 'A point is a single location with no length — but a beam clearly travels a distance.' },
+          { id: 'b', label: 'A segment', whyWrong: 'A segment stops at a second endpoint. Does the beam have a far end where it stops?' },
           { id: 'c', label: 'A ray' },
-          { id: 'd', label: 'A line' },
+          { id: 'd', label: 'A line', whyWrong: 'A line extends forever in BOTH directions — but the beam has one clear starting point (the bulb).' },
         ],
         correctOptionId: 'c',
         feedback: {
@@ -146,9 +146,9 @@ export const LESSONS: Lesson[] = [
         prompt: 'What is the key difference between a line and a segment?',
         options: [
           { id: 'a', label: 'A line goes on forever in both directions; a segment has two endpoints' },
-          { id: 'b', label: 'A line is straight; a segment is curved' },
-          { id: 'c', label: 'A line is longer, but both have two endpoints' },
-          { id: 'd', label: 'There is no difference' },
+          { id: 'b', label: 'A line is straight; a segment is curved', whyWrong: 'Both are straight — neither is curved. The difference is about whether they end.' },
+          { id: 'c', label: 'A line is longer, but both have two endpoints', whyWrong: 'It is not about length — and a line has NO endpoints, while a segment has two.' },
+          { id: 'd', label: 'There is no difference', whyWrong: 'There is a real difference — focus on the endpoints and whether each one ends.' },
         ],
         correctOptionId: 'a',
         feedback: {
@@ -627,8 +627,8 @@ export const LESSONS: Lesson[] = [
         figure: { kind: 'rightTriangle', a: 3, b: 4 },
         options: [
           { id: 'a', label: 'The longest side, opposite the right angle' },
-          { id: 'b', label: 'The shortest side' },
-          { id: 'c', label: 'A side that touches the right angle' },
+          { id: 'b', label: 'The shortest side', whyWrong: 'The hypotenuse is the LONGEST side, not the shortest.' },
+          { id: 'c', label: 'A side that touches the right angle', whyWrong: 'The two sides touching the right angle are the legs — the hypotenuse is across from it.' },
         ],
         correctOptionId: 'a',
         feedback: {
@@ -1178,10 +1178,10 @@ export const LESSONS: Lesson[] = [
         prompt: 'How many lines of symmetry does a square have?',
         figure: { kind: 'symmetryLines' },
         options: [
-          { id: 'a', label: '2' },
+          { id: 'a', label: '2', whyWrong: 'You may have counted only the vertical and horizontal folds — don’t forget the two diagonal folds.' },
           { id: 'b', label: '4' },
-          { id: 'c', label: '1' },
-          { id: 'd', label: '0' },
+          { id: 'c', label: '1', whyWrong: 'A square has more than one fold that makes the halves match — keep looking.' },
+          { id: 'd', label: '0', whyWrong: 'A square is highly symmetric — it definitely has fold lines of symmetry.' },
         ],
         correctOptionId: 'b',
         feedback: {

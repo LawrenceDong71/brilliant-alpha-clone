@@ -12,6 +12,27 @@ export interface StepState {
   firstTry: boolean
 }
 
+/**
+ * Phase 3 (learning science): per-concept mastery + spaced-repetition state.
+ * Tracked separately from per-lesson progress so the core-6 mastery/points math
+ * stays clean.
+ */
+export interface ConceptMastery {
+  concept: import('../content/types').ConceptId
+  /** Recent first-try outcomes (most recent last), capped. Drives `level`. */
+  history: boolean[]
+  /** Rolling first-try success (0..1) over the recent window. */
+  level: number
+  /** Consecutive first-try successes → position on the spacing ladder. */
+  intervalIndex: number
+  /** Epoch ms when this concept is next due for review. */
+  dueAt: number
+  /** Epoch ms of the last encounter (0 = never seen). */
+  lastSeen: number
+}
+
+export type ConceptMasteryMap = Partial<Record<import('../content/types').ConceptId, ConceptMastery>>
+
 export interface LessonProgress {
   status: 'inProgress' | 'completed'
   currentStepIndex: number

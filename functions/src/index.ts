@@ -1,7 +1,9 @@
 import { onRequest } from 'firebase-functions/v2/https'
+import { onSchedule } from 'firebase-functions/v2/scheduler'
 import { defineSecret } from 'firebase-functions/params'
 import { initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
+import { getFirestore } from 'firebase-admin/firestore'
 import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
 import { lookupCache, saveCache, evictBadCandidate } from './cache.js'
@@ -20,10 +22,15 @@ const MODEL = process.env.OPENAI_MODEL ?? 'gpt-4o-mini'
  * (recommended for self-contained interactive front-end generation); otherwise
  * OpenAI. Override with the CODEGEN_MODEL env var.
  */
-const CODEGEN_MODEL = process.env.CODEGEN_MODEL ?? 'gpt-4.1-mini'
+const CODEGEN_MODEL = process.env.CODEGEN_MODEL ?? 'gpt-5.5'
 
-/** Hard ceiling on generated length — keeps latency (and cost) bounded. */
-const CODEGEN_MAX_TOKENS = 4000
+/**
+ * Hard ceiling on generated length — keeps latency (and cost) bounded. Higher
+ * than before so a stronger (reasoning-capable) codegen model has room for its
+ * reasoning tokens AND a complete HTML document without getting truncated
+ * mid-tag (a truncated document renders as a broken widget).
+ */
+const CODEGEN_MAX_TOKENS = 8000
 
 /** Firestore collections backing the semantic activity caches. */
 const DESIGN_CACHE = 'designProblemCache'
@@ -173,12 +180,15 @@ export const generateWidget = onRequest(
       return
     }
 
-    const body = (req.body ?? {}) as { scenario?: unknown; model?: unknown }
+    const body = (req.body ?? {}) as { scenario?: unknown; model?: unknown; exact?: unknown }
     if (typeof body.scenario !== 'string' || !body.scenario.trim()) {
       res.status(400).json({ error: 'scenario_required' })
       return
     }
     const scenario = body.scenario
+    // Daily Review variants set exact:true so near-identical themed prompts are
+    // cached/served individually (not merged by the semantic layer).
+    const exactOnly = body.exact === true
     // Per-request model from the UI picker, allowlisted by prefix so a stray
     // string can't be passed through to the provider. Falls back to CODEGEN_MODEL.
     const requested = typeof body.model === 'string' ? body.model : ''
@@ -188,7 +198,11 @@ export const generateWidget = onRequest(
     // HTML widget without re-running the expensive code-generation call.
     // Embeddings use the OpenAI key regardless of which model generates the HTML.
     const openaiKey = OPENAI_API_KEY.value()
-    const cached = openaiKey ? await lookupCache<{ html: string }>(WIDGET_CACHE, scenario, openaiKey) : { hit: false, embedding: null as number[] | null }
+    // Exact-only lookups don't need embeddings, so they work even without a key.
+    const canLookup = exactOnly || !!openaiKey
+    const cached = canLookup
+      ? await lookupCache<{ html: string }>(WIDGET_CACHE, scenario, openaiKey, exactOnly)
+      : { hit: false, embedding: null as number[] | null }
     if (cached.hit && cached.result) {
       res.status(200).json(cached.result)
       return
@@ -197,8 +211,13 @@ export const generateWidget = onRequest(
     try {
       const html = await completeText(model, WIDGET_SYSTEM_PROMPT, `Scenario: ${scenario}`)
       const result = { html }
-      // Only cache non-empty generations.
-      if (html.trim()) await saveCache(WIDGET_CACHE, scenario, result, cached.embedding)
+      // Only cache non-empty generations. Tag review variants (exact path) so the
+      // scheduled flush can clear just those, leaving the studio cache intact.
+      if (html.trim()) {
+        await saveCache(WIDGET_CACHE, scenario, result, cached.embedding, {
+          kind: exactOnly ? 'review' : 'studio',
+        })
+      }
       res.status(200).json(result)
     } catch (e) {
       res.status(502).json({ error: 'generation_failed', detail: e instanceof Error ? e.message : String(e) })
@@ -284,3 +303,15 @@ export const designProblem = onRequest(
     }
   },
 )
+
+/**
+ * Keep Daily Review fresh: every 10 minutes, flush cached review activities so
+ * the same question is never served again across sessions. Only review-tagged
+ * widgets (kind === 'review') are removed — the Design-a-Problem studio cache is
+ * left intact so it keeps its cost-saving reuse.
+ */
+export const flushReviewCache = onSchedule('every 10 minutes', async () => {
+  const db = getFirestore()
+  const snap = await db.collection(WIDGET_CACHE).where('kind', '==', 'review').get()
+  await Promise.all(snap.docs.map((d) => d.ref.delete()))
+})

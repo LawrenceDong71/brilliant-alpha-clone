@@ -101,6 +101,22 @@ export function LessonPage() {
     }
   }
 
+  // A self-contained step (e.g. AngleLock) solved itself via its own action —
+  // mark it complete without requiring a separate "Check" press.
+  const autoComplete = () => {
+    if (solved) return
+    setSolved(true)
+    setGradeResults((prev) => ({ ...prev, [step.id]: { attempts, solved: true } }))
+    void saveStep({
+      lessonId: lesson.id,
+      stepId: step.id,
+      attempts,
+      solved: true,
+      firstTry: attempts === 0,
+      currentStepIndex: stepIndex,
+    })
+  }
+
   const skip = () => {
     setGradeResults((prev) => ({ ...prev, [step.id]: { attempts, solved: false } }))
     void saveStep({
@@ -149,7 +165,7 @@ export function LessonPage() {
       <div className="lesson-body">
         <h2 className="step-prompt">{step.prompt}</h2>
 
-        <StepRenderer key={step.id} step={step} setChecker={setChecker} locked={solved} />
+        <StepRenderer key={step.id} step={step} setChecker={setChecker} locked={solved} onAutoComplete={autoComplete} />
 
         {solved && (
           <div className="feedback correct">

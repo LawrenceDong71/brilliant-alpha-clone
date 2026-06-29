@@ -13,6 +13,8 @@ export interface DesignProblemOptions {
   provider?: AiProvider
   id?: string
   maxRepairs?: number
+  /** Phase 3: request a fresh, creative spaced-review variant. */
+  creative?: boolean
 }
 
 /**
@@ -35,6 +37,7 @@ export async function designProblem(
   for (let attempt = 1; attempt <= maxRepairs + 1; attempt++) {
     const raw = await provider.designProblem({
       scenario,
+      creative: options.creative,
       repair:
         previous !== undefined
           ? { previous, failures: lastFailures.map((f) => f.message) }
